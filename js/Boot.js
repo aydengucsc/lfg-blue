@@ -1,6 +1,6 @@
-var Game = {};
-Game.Boot = function(){};
-Game.Boot.prototype =
+var Busters = window.Busters || (window.Busters = {});
+Busters.Boot = function(){};
+Busters.Boot.prototype =
 {
 	preload: function()
 	{
@@ -10,7 +10,7 @@ Game.Boot.prototype =
 	},
 	create: function()
 	{
-		this.game.state.start('Level1');
+		this.state.start('Level1');
 	},
 	update: function()
 	{

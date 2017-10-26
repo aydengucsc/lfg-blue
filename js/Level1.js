@@ -1,5 +1,5 @@
-Game.Level1 = function(){};
-Game.Level1.prototype = 
+Busters.Level1 = function(){};
+Busters.Level1.prototype = 
 {
 	create: function()
 	{

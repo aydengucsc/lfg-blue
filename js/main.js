@@ -2,11 +2,12 @@ var GameState =
 {
 		preload: function()
 		{
-			this.load.image('background', 'assets/images/background.png');
+			this.load.image('titlescreen', 'assets/images/background.png');
+			this.load.image('button', 'assets/images/button.png');
 		},
 		create: function()
 		{
-			this.background = this.game.add.sprite(0,0,'background');
+			this.state.start('MainMenu');
 		},
 		update: function()
 		{
@@ -14,6 +15,4 @@ var GameState =
 		}
 };
 
-var game = new Phaser.Game(540, 960, Phaser.AUTO);
-game.state.add('GameState',GameState);
-game.state.start('GameState');
+var game = new Phaser.Game(1080, 1920, Phaser.AUTO);

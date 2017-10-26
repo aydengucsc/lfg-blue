@@ -1,18 +1,10 @@
-var GameState = 
+window.onload = function()
 {
-		preload: function()
-		{
-			this.load.image('titlescreen', 'assets/images/background.png');
-			this.load.image('button', 'assets/images/button.png');
-		},
-		create: function()
-		{
-			this.state.start('MainMenu');
-		},
-		update: function()
-		{
-			
-		}
-};
-
-var game = new Phaser.Game(1080, 1920, Phaser.AUTO);
+	var game = new Phaser.Game(1080, 1920, Phaser.CANVAS,'');
+	game.state.add('Boot',Game.Boot);
+	game.state.add('Preloader',Game.Preloader);
+	game.state.add('MainMenu',Game.MainMenu);
+	game.state.add('Level1',Game.Level1);
+	
+	game.state.start('Boot');
+}

@@ -1,4 +1,4 @@
-Game.MainMenu = function(game)
+/*Game.MainMenu = function(game)
 {
 	
 };
@@ -9,8 +9,8 @@ Game.MainMenu.prototype =
 {
 	create:function(game)
 	{
-		this.createButton(game,"Start Game",game.world.centerX,game.world.centerY+32, 300, 100, function(){this.state.start('Level1')};
-		this.createButton(game,"About",game.world.centerX,game.world.centerY+192, 300, 100, function(){console.log("about")};
+		this.createButton(game,"Start Game",game.world.centerX,game.world.centerY+32, 300, 100, function(){this.state.start('Level1')});
+		this.createButton(game,"About",game.world.centerX,game.world.centerY+192, 300, 100, function(){console.log("about")});
 	
 		titlescreen = game.add.sprite(game.world.centerX,game.world.centerY-192,'titlescreen');
 		titlescreen.anchor.setTo(0.5,0.5);
@@ -28,4 +28,4 @@ Game.MainMenu.prototype =
 		var txt = game.add.text(button1.x,button1.y,string,{font:"12px Arial", fill: "#fff",align:"center"});
 		txt.anchor.setTo(0.5,0.5);
 	}
-};
+};*/

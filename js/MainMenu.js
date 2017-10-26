@@ -1,4 +1,4 @@
-/*Game.MainMenu = function(game)
+Game.MainMenu = function(game)
 {
 	
 };
@@ -28,4 +28,4 @@ Game.MainMenu.prototype =
 		var txt = game.add.text(button1.x,button1.y,string,{font:"12px Arial", fill: "#fff",align:"center"});
 		txt.anchor.setTo(0.5,0.5);
 	}
-};*/
+};

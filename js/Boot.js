@@ -1,12 +1,7 @@
 var Game = {};
-Game.boot = function(game){};
+Game.Boot = function(){};
 Game.Boot.prototype =
 {
-	init: function()
-	{
-		this.input.maxPointers = 1;
-		this.stage.disableVisibilityChange = true;
-	}
 	preload: function()
 	{
 		this.load.image('titlescreen', 'assets/images/background.png');
@@ -15,7 +10,7 @@ Game.Boot.prototype =
 	},
 	create: function()
 	{
-		this.state.start('Preloader');
+		this.game.state.start('Level1');
 	},
 	update: function()
 	{

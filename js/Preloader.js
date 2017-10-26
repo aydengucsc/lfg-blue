@@ -14,6 +14,6 @@ Game.Preload.prototype =
 	},
 	create: function()
 	{
-		this.state.start("Level1");
+		this.game.state.start("Level1");
 	}
 }

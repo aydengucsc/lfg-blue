@@ -7,4 +7,4 @@ game.state.add('Boot', Boot);
 game.state.add('Preloader', Preloader);
 game.state.add('Level1', Level1);
 game.state.start('Boot');
-}
+};

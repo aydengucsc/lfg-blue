@@ -1,8 +1,4 @@
-MainMenu = function()
-{
-	
-};
-MainMenu.prototype = 
+var MainMenu =
 {
 	preload: function()
 	{
@@ -31,3 +27,7 @@ MainMenu.prototype =
 		txt.anchor.setTo(0.5,0.5);
 	}
 };
+// MainMenu.prototype = 
+// {
+	
+// };

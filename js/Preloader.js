@@ -1,9 +1,4 @@
-Preloader = function()
-{
-}
-
-Preloader.prototype = 
-{
+var Preloader = {
 	preload: function()
 	{
 		console.log("preload");
@@ -22,3 +17,8 @@ Preloader.prototype =
 		game.state.start("MainMenu");
 	}
 }
+
+// Preloader.prototype = 
+// {
+	
+// }

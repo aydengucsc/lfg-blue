@@ -1,5 +1,4 @@
-Boot = function(){};
-Boot.prototype =
+var Boot = 
 {
 	preload: function()
 	{
@@ -15,3 +14,7 @@ Boot.prototype =
 
 	}
 };
+// Boot.prototype =
+// {
+	
+// };

@@ -1,19 +1,22 @@
-Game.Preloader = function(game)
+Preloader = function()
 {
-		this.preloadBar = null;
 }
 
-Game.Preload.prototype = 
+Preloader.prototype = 
 {
 	preload: function()
 	{
-		this.reloadBar = this.add.sprite(this.world.centerX,this.world.centerY,'preloadBar');
-		this.preloadBar.anchor.setTo(0.5,0.5);
-		this.time.advancedTiming = true;
-		this.load.setPreloadSprite(this.preloadBar);
+		console.log("preload");
+		var preloadBar = this.add.sprite(game.world.centerX,game.world.centerY,'loadbar');
+		preloadBar.anchor.setTo(0.5,0.5);
+		game.load.setPreloadSprite(preloadBar);
+
+		game.load.image('titlescreen', 'assets/images/background.png');
+		game.load.image('button', 'assets/images/button.png');
+		game.load.image('title', 'assets/images/title.png');
 	},
 	create: function()
 	{
-		this.game.state.start("Level1");
+		game.state.start("MainMenu");
 	}
 }

@@ -1,16 +1,17 @@
-Busters.Boot = function(){};
-Busters.Boot.prototype =
+Boot = function(){};
+Boot.prototype =
 {
 	preload: function()
 	{
-		Busters.game.load.image('titlescreen', 'assets/images/background.png');
-		Busters.game.load.image('preloadBar', 'assets/images/button.png');
-		Busters.game.load.image('button', 'assets/images/button.png');
+		game.load.image('titlescreen', 'assets/images/background.png');
+		game.load.image('preloadBar', 'assets/images/button.png');
+		game.load.image('button', 'assets/images/button.png');
 	},
 	create: function()
 	{
-		Busters.game.background = Busters.game.add.sprite(0, 0, 'titlescreen');
-		// Busters.game.state.start('Level1');
+		console.log("boot");
+		game.background = game.add.sprite(0, 0, 'titlescreen');
+		game.state.start('MainMenu');
 	},
 	update: function()
 	{

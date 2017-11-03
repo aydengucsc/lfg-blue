@@ -1,19 +1,24 @@
-Game.Preloader = function(game)
-{
-		this.preloadBar = null;
-}
-
-Game.Preload.prototype = 
-{
+var Preloader = {
 	preload: function()
 	{
-		this.reloadBar = this.add.sprite(this.world.centerX,this.world.centerY,'preloadBar');
-		this.preloadBar.anchor.setTo(0.5,0.5);
-		this.time.advancedTiming = true;
-		this.load.setPreloadSprite(this.preloadBar);
+		console.log("preload");
+		var preloadBar = this.add.sprite(game.world.centerX,game.world.centerY,'loadbar');
+		preloadBar.anchor.setTo(0.5,0.5);
+		game.load.setPreloadSprite(preloadBar);
+
+		game.load.image('titlescreen', 'assets/images/background.png');
+		game.load.spritesheet('button', 'assets/images/flixel-button.png', 80, 20);
+		game.load.image('title', 'assets/images/title.png');
+		game.load.image('pause', 'assets/images/pause.png');
+		
 	},
 	create: function()
 	{
-		this.game.state.start("Level1");
+		game.state.start("MainMenu");
 	}
 }
+
+// Preloader.prototype = 
+// {
+	
+// }

@@ -2,13 +2,20 @@ var Level1 =
 {
 	preload: function()
 	{
+		//game.load.image('background', 'assets/images/Level1.png');
 		//brighter test image so the pause overlay is more obviously transparent
 		game.load.image('background', 'assets/images/level1_test.png');
+
 
  	},
 	create: function()
 	{
-		console.log("Lv.1");
+
+		var score = 0;
+		var scoreName;
+		var scoreString = '';
+		
+		console.log("lv.1");
 		test = 0;
 		background = game.add.sprite(0, 0, 'background');
 		//temporary? pause button
@@ -16,6 +23,8 @@ var Level1 =
 		//Intentional. This makes testing easier
 		this.createButton("Pause",game.world.centerX*1.65, 100, 300, 100, this.pauseFunct);
 
+		scoreString = 'ScoreTest : ';
+		scoreName = game.add.text(10,10, scoreString + score, {font: '40px Arial', fill:'#fff'});
 		game.input.keyboard.addCallbacks(this, null, null, this.pressFunct);
 		//test text that increments per frame so we can test the pause menu.
 		//Feel free to remove when we actually have a game.

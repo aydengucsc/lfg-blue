@@ -43,12 +43,15 @@ var Level1 =
 		if(game.paused){
 			pauseScreen.kill();
 			pauseText.kill();
-			resumeBtn[0].kill();
-			resumeBtn[1].kill();
-			menuBtn[0].kill();
-			menuBtn[1].kill();
-			restartBtn[0].kill();
-			restartBtn[1].kill();
+			this.removeButton(resumeBtn)
+			this.removeButton(menuBtn)
+			this.removeButton(restartBtn)
+			// resumeBtn[0].kill();
+			// resumeBtn[1].kill();
+			// menuBtn[0].kill();
+			// menuBtn[1].kill();
+			// restartBtn[0].kill();
+			// restartBtn[1].kill();
 			
 			game.paused = false;
 		}//if not paused, pause and make menu
@@ -72,6 +75,11 @@ var Level1 =
 		var txt = game.add.text(button1.x,button1.y,string,{font:"40px Arial", fill: "#0",align:"center"});
 		txt.anchor.setTo(0.5,0.5);
 		return {"0":button1,"1":txt};
+	},
+	removeButton:function(object)
+	{
+		object[0].kill();
+		object[1].kill();
 	}
 };
 // Level1.prototype =

@@ -50,7 +50,7 @@ var Level1 =
 	        b.events.onOutOfBounds.add(this.resetBullet, this);
 	    }
 
-		sprite = game.add.sprite(game.world.centerX, window.innerHeight * 0.9, 'triangle')
+		sprite = game.add.sprite(game.world.centerX, game.world.centerY * 1.8, 'triangle')
 		sprite.scale.setTo(0.1,0.1);
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
 

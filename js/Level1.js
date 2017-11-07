@@ -1,3 +1,8 @@
+var sprite;
+var bullets;
+var cursors;
+var bulletTime = 0;
+var bullet;
 var Level1 = 
 {
 	preload: function()
@@ -5,7 +10,8 @@ var Level1 =
 		//game.load.image('background', 'assets/images/Level1.png');
 		//brighter test image so the pause overlay is more obviously transparent
 		game.load.image('background', 'assets/images/level1_test.png');
-
+		game.load.image('triangle', 'assets/images/triangle.png');
+		game.load.image('bullet', 'assets/images/bullet.png');
 
  	},
 	create: function()
@@ -15,7 +21,7 @@ var Level1 =
 		var scoreName;
 		var scoreString = '';
 		
-		console.log("lv.1");
+		console.log("Lv.1");
 		test = 0;
 		background = game.add.sprite(0, 0, 'background');
 		//temporary? pause button
@@ -29,6 +35,27 @@ var Level1 =
 		//test text that increments per frame so we can test the pause menu.
 		//Feel free to remove when we actually have a game.
 		testText = game.add.text(game.world.centerX-475,game.world.centerY-400,"Game up:" + test,{font:"100px Verdana", fill: "#F",align:"center"});
+		
+	 	bullets = game.add.group();
+	    bullets.enableBody = true;
+	    bullets.physicsBodyType = Phaser.Physics.ARCADE;
+
+	    for (var i = 0; i < 20; i++)
+	    {
+	        var b = bullets.create(0, 0, 'bullet');
+	        b.name = 'bullet' + i;
+	        b.exists = false;
+	        b.visible = false;
+	        b.checkWorldBounds = true;
+	        b.events.onOutOfBounds.add(this.resetBullet, this);
+	    }
+
+		sprite = game.add.sprite(game.world.centerX, window.innerHeight * 0.9, 'triangle')
+		sprite.scale.setTo(0.1,0.1);
+		game.physics.enable(sprite, Phaser.Physics.ARCADE);
+
+		cursors = game.input.keyboard.createCursorKeys();
+		game.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ]);
 	},
 	update: function()
 	{
@@ -36,6 +63,31 @@ var Level1 =
 		//console.log("game up: ", test);
 		test++;
 		testText.text = "Game up:" + test;
+		
+		sprite.body.velocity.x = 0;
+	    sprite.body.velocity.y = 0;
+
+	    if (cursors.left.isDown)
+	    {
+	        sprite.body.velocity.x = -300;
+	    }
+	    if (cursors.right.isDown)
+	    {
+	        sprite.body.velocity.x = 300;
+	    }
+	    if (cursors.up.isDown)
+	    {
+	    	sprite.body.velocity.y = -300;
+	    }
+	    if (cursors.down.isDown)
+	    {
+	    	sprite.body.velocity.y = 300;
+	    }
+
+	    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR))
+	    {
+	        this.fireBullet();
+	    }
 	},
 	//Press the P button to pause
 	pressFunct: function(char){
@@ -89,6 +141,22 @@ var Level1 =
 	{
 		object[0].kill();
 		object[1].kill();
+	},
+	fireBullet: function() {
+		if (game.time.now > bulletTime)
+	    {
+	        bullet = bullets.getFirstExists(false);
+
+	        if (bullet)
+	        {
+	            bullet.reset(sprite.x + 19, sprite.y - 16);
+	            bullet.body.velocity.y = -300;
+	            bulletTime = game.time.now + 150;
+	        }
+	    }
+	},
+	resetBullet : function(bullet) {
+		bullet.kill();
 	}
 };
 // Level1.prototype =

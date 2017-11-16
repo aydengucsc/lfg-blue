@@ -32,7 +32,7 @@ var Level1 =
 		//it's not killed when we pause, just covered. You can still click it to unpause.
 		//Intentional. This makes testing easier
 		this.createButton("Pause",game.world.centerX*1.65, 100, 300, 100, this.pauseFunct);
-		this.createButton("Kill",game.world.centerX*1.65, 200, 300, 100, this.killFunct);
+		this.createButton("Cheat!",game.world.centerX*1.65, 225, 300, 100, function(){console.log("Cheating time")});
 		// stateText = game.add.text(game.world.centerX-475,game.world.centerY-600,"",{font:"250px Verdana", fill: "#FFF",align:"center"});
 		// stateText.visible = false;
 
@@ -62,16 +62,11 @@ var Level1 =
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
 
 		//lives
-	    lives = game.add.group();
-	    game.add.text(game.world.width-175, game.world.height - 120, 'Lives : ', { font: '50px Arial', fill: '#fff' });
-	    for (var i = 0; i < 3; i++) 
-	    {
-	        var count = lives.create(game.world.width-175 + (60 * i), game.world.height-45, 'triangle');
-	        count.scale.setTo(0.1,0.1);
-	        count.anchor.setTo(0.5, 0.5);
-	        count.angle = 90;
+	    lives = 3;
+	    lifeCounter = game.add.text(60, game.world.height - 75, 'X ' + lives, { font: '60px Arial', fill: '#fff' });
+		lifeCount = game.add.sprite(5, game.world.height-68, 'triangle');
+	        lifeCount.scale.setTo(0.1,0.1);
 	        //count.alpha = 0.4;
-	    }
 
 	    //boom
 	    explosions = game.add.group();
@@ -92,7 +87,8 @@ var Level1 =
 	{
 		test++;
 		testText.text = "Game up:" + test;
-		
+		lifeCounter.text = "X " + lives;
+
 		sprite.body.velocity.x = 0;
 	    sprite.body.velocity.y = 0;
 
@@ -122,14 +118,12 @@ var Level1 =
 		 */
 	},
 	killFunct: function(char){
-	    live = lives.getFirstAlive();
-
-	    if (live)
+	    if (lives>0)
 	    {
-	        live.kill();
 			var explosion = explosions.getFirstExists(false);
 		    explosion.reset(sprite.body.x, sprite.body.y);
 		    explosion.play('explode', 30, false, true);
+		    lives--;
 	    }
 	    else console.log("Game over");
 	},
@@ -144,12 +138,6 @@ var Level1 =
 			this.removeButton(resumeBtn)
 			this.removeButton(menuBtn)
 			this.removeButton(restartBtn)
-			// resumeBtn[0].kill();
-			// resumeBtn[1].kill();
-			// menuBtn[0].kill();
-			// menuBtn[1].kill();
-			// restartBtn[0].kill();
-			// restartBtn[1].kill();
 			
 			game.paused = false;
 		}//if not paused, pause and make menu

@@ -14,7 +14,9 @@ var Preloader = {
 	},
 	create: function()
 	{
-		game.state.start("MainMenu");
+		//game.state.start("MainMenu");
+		//Boot right into lv.1 because I'm getting tired of menu
+		game.state.start("Level1");
 	}
 }
 

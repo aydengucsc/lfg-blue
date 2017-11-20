@@ -3,8 +3,12 @@ var bullets;
 var cursors;
 var bulletTime = 0;
 var bullet;
+
+//var moveSpeedMultiplier = 1;
+
 var lives;
-var stateVar;
+//var stateVar;
+
 var Level1 = 
 {
 	preload: function()
@@ -13,10 +17,12 @@ var Level1 =
  	},
 	create: function()
 	{
+		shootSpeedMultiplier = 1;
+		moveSpeedMultiplier = 1;
 		stateVar = "START";
-		var score = 0;
-		var scoreName;
-		var scoreString = '';
+		score = 0;
+		// var scoreName;
+		// var scoreString = '';
 		
 		console.log("Lv.1");
 		test = 0;
@@ -27,7 +33,7 @@ var Level1 =
 		this.createButton("Pause",game.world.centerX*1.65, 100, 300, 100, this.pauseMenu);
 		this.createButton("Cheat!",game.world.centerX*1.65, 225, 300, 100, this.cheatFunct);
 
-		scoreString = 'ScoreTest : ';
+		scoreString = 'Score: ';
 		scoreName = game.add.text(10,10, scoreString + score, {font: '40px Arial', fill:'#fff'});
 		game.input.keyboard.addCallbacks(this, null, null, this.pressFunct);
 		//test text that increments per frame so we can test the pause menu.
@@ -38,7 +44,7 @@ var Level1 =
 	    bullets.enableBody = true;
 	    bullets.physicsBodyType = Phaser.Physics.ARCADE;
 
-	    for (var i = 0; i < 200; i++)
+	    for (var i = 0; i < 600; i++)
 	    {
 	        var b = bullets.create(0, 0, 'bullet');
 	        b.name = 'bullet' + i;
@@ -76,17 +82,18 @@ var Level1 =
 	},
 	update: function()
 	{
+		scoreName.text = scoreString + score;
 		test++;
 		testText.text = "Game up:" + test;
 		lifeCounter.text = "X " + lives;
 
 		sprite.body.velocity.x = 0;
 	    sprite.body.velocity.y = 0;
-
-	    if (cursors.left.isDown) sprite.body.velocity.x = -300;
-	    if (cursors.right.isDown) sprite.body.velocity.x = 300;
-	    if (cursors.up.isDown) sprite.body.velocity.y = -300;
-	    if (cursors.down.isDown) sprite.body.velocity.y = 300;
+	    speed = 300 * moveSpeedMultiplier;
+	    if (cursors.left.isDown) sprite.body.velocity.x = -speed;
+	    if (cursors.right.isDown) sprite.body.velocity.x = speed;
+	    if (cursors.up.isDown) sprite.body.velocity.y = -speed;
+	    if (cursors.down.isDown) sprite.body.velocity.y = speed;
 
 	    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) this.fireBullet();
 	},
@@ -136,32 +143,41 @@ var Level1 =
 			this.removeButton(resumeBtn)
 			this.removeButton(lifeBtn)
 			this.removeButton(dieBtn)
-			this.removeButton(placeholderBtn)
-			this.removeButton(placeholderBtn2)
-			this.removeButton(placeholderBtn3)
-			this.removeButton(placeholderBtn4)
+			this.removeButton(speedBtn)
+			this.removeButton(slowBtn)
+			this.removeButton(shootFastBtn)
+			this.removeButton(fasterBtn)
+			this.removeButton(fastererBtn)
+			this.removeButton(fasterestBtn)
+			this.removeButton(scoreBtn)
 			this.pauseFunct();
 		}//if not paused, pause and make menu
 		else{
 		//Lots of placeholders to demonstrate possible button placements. 
 		//For X, use centerX, X+360, X-360
 		//for Y, Add 150 between each button.
-		this.pauseFunct("Cheats");
+		this.pauseFunct("Cheats", 250);
 		resumeBtn = this.createButton("Resume",game.world.centerX,game.world.centerY+900,
 						 300, 100, this.cheatFunct);
+
 		lifeBtn = this.createButton("More lives?",game.world.centerX+360,game.world.centerY+30,
 						 300, 100, function(){lives+=5;});
-		dieBtn = this.createButton("Lose lives???",game.world.centerX,game.world.centerY+30, 
+		dieBtn = this.createButton("Lose lives???",game.world.centerX+360,game.world.centerY+180, 
 						300, 100, function(){lives-=5;});
-		placeholderBtn = this.createButton("idk",game.world.centerX-360,game.world.centerY+30, 
-						300, 100, function(){console.log("I dunno what else to cheat with");});
-		placeholderBtn2 = this.createButton("really idk",game.world.centerX,game.world.centerY+180, 
-						300, 100, function(){console.log("hello world");});
-		placeholderBtn3 = this.createButton("hi",game.world.centerX,game.world.centerY+330, 
-						300, 100, function(){console.log("placeholder");});
-
-		placeholderBtn4 = this.createButton("no",game.world.centerX,game.world.centerY+480, 
-						300, 100, function(){console.log("ajdfkgh");});
+		scoreBtn = this.createButton("Increase score",game.world.centerX+360,game.world.centerY+330, 
+						300, 100, function(){score+= 500;});
+		speedBtn = this.createButton("Go fast",game.world.centerX-360,game.world.centerY+30, 
+						300, 100, function(){moveSpeedMultiplier = 2;});
+		slowBtn = this.createButton("Go slow???",game.world.centerX-360,game.world.centerY+180, 
+						300, 100, function(){moveSpeedMultiplier = 0.5;});
+		shootFastBtn = this.createButton("Shoot fast",game.world.centerX,game.world.centerY+30, 
+						300, 100, function(){shootSpeedMultiplier = 1.5;});
+		fasterBtn = this.createButton("Shoot faster",game.world.centerX,game.world.centerY+180, 
+						300, 100, function(){shootSpeedMultiplier = 2.5;});
+		fastererBtn = this.createButton("Shoot fasterer",game.world.centerX,game.world.centerY+330, 
+						300, 100, function(){shootSpeedMultiplier = 6;});
+		fasterestBtn = this.createButton("Shoot fasterest",game.world.centerX,game.world.centerY+480, 
+						300, 100, function(){shootSpeedMultiplier = -500;});
 		}
 	},
 	//if game's already paused/over, don't unpause it cause you lost
@@ -171,7 +187,11 @@ var Level1 =
 			console.log("Game over");
 		}//if not paused, pause and make menu
 		else{
-		this.pauseFunct(" Game\n Over");
+		this.pauseFunct(" Game\n Over", 250, null, game.world.centerY-900);
+		var string = "Score:" + score;
+		scoreText = game.add.text(game.world.centerX-this.scaleX(string, 60), game.world.centerY-200,
+						 string, {font:"120px Verdana", fill: "#FFF",align:"left"})
+
 		restartBtn = this.createButton("Restart",game.world.centerX,game.world.centerY+292,
 						 300, 100, function(){game.state.start('Level1'); game.paused = false;});
 		menuBtn = this.createButton("Menu",game.world.centerX,game.world.centerY+132, 300,
@@ -188,7 +208,7 @@ var Level1 =
 			this.pauseFunct();
 		}//if not paused, pause and make menu
 		else{
-		this.pauseFunct("Paused!");
+		this.pauseFunct("Paused!", 250);
 		resumeBtn = this.createButton("Resume",game.world.centerX+275,game.world.centerY+32,
 						 300, 100, this.pauseFunct);
 		restartBtn = this.createButton("Restart",game.world.centerX+275,game.world.centerY+192,
@@ -198,7 +218,7 @@ var Level1 =
 		}
 	},
 	//if paused, unpause and remove pause screen
-	pauseFunct: function(string){
+	pauseFunct: function(string, fontsize, x, y){
 		if(game.paused){
 			pauseScreen.kill();
 			pauseText.kill();
@@ -209,9 +229,14 @@ var Level1 =
 		console.log(string ,": ", test);
 		game.paused = true;
 
+		if (x == undefined)textX = game.world.centerX-475;
+			else textX = x;
+		if (y == undefined)textY = game.world.centerY-600;
+			else textY = y;
+
 		pauseScreen = game.add.sprite(0, 0, 'pause');
-		pauseText = game.add.text(game.world.centerX-475,game.world.centerY-600,
-			string,{font:"250px Verdana", fill: "#FFF",align:"center"});
+		pauseText = game.add.text(textX	,textY,
+			string,{font:fontsize+"px Verdana", fill: "#FFF",align:"center"});
 		}
 	},
 	//aydeng's createButton, modified to return the button&text so we can kill() them later.
@@ -230,16 +255,22 @@ var Level1 =
 		object[0].kill();
 		object[1].kill();
 	},
+	scaleX:function(string, fontsize)
+	{
+		x = string.length * fontsize;
+		return x;
+	},
 	fireBullet: function() {
 		if (game.time.now > bulletTime)
 	    {
 	        bullet = bullets.getFirstExists(false);
-
+	        shootDelay = 500 / shootSpeedMultiplier;
 	        if (bullet)
 	        {
 	            bullet.reset(sprite.x + 19, sprite.y - 16);
 	            bullet.body.velocity.y = -300;
-	            bulletTime = game.time.now + 150;
+	            //console.log("Fired shot:" + test);
+	            bulletTime = game.time.now +shootDelay;
 	        }
 	    }
 	},

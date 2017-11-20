@@ -4,23 +4,16 @@ var cursors;
 var bulletTime = 0;
 var bullet;
 var lives;
-var state;
+var stateVar;
 var Level1 = 
 {
 	preload: function()
 	{
-		game.load.image('background', 'assets/images/Level1.png');
-		//brighter test image so the pause overlay is more obviously transparent
-		//game.load.image('background', 'assets/images/level1_test.png');
-		game.load.image('triangle', 'assets/images/triangle.png');
-		game.load.image('bullet', 'assets/images/bullet.png');
-
-		//temporary assets borrowed from phaser examples
-		game.load.spritesheet('explode', 'assets/images/explode.png', 128, 128);
+		//Preloading stuff moved to preloader.js
  	},
 	create: function()
 	{
-
+		stateVar = "START";
 		var score = 0;
 		var scoreName;
 		var scoreString = '';
@@ -99,23 +92,23 @@ var Level1 =
 	},
 	//handles button presses
 	pressFunct: function(char){
-		if(char === 'p' && state != "CHEAT" && state != "END"){
+		if(char == 'p' && stateVar != "CHEAT" && stateVar != "END"){
 			this.pauseMenu();
 		}
-		if(char === 'r' && game.paused){
+		if(char == 'r' && game.paused){
 			game.state.start('Level1');
 			game.paused = false;
 		}
-		if(char === 'c' && game.paused && state!= "END"){
-			if (state == "PAUSE")this.pauseMenu();
+		if(char == 'c' && game.paused && stateVar!= "END"){
+			if (stateVar == "PAUSE")this.pauseMenu();
 			this.cheatFunct();
 		}
 		//debug kill
-		if(char === 'k'){
+		if(char == 'k'){
 			this.killFunct();
 		}
 		//cheat: live + 5
-		if(char === 'l'){
+		if(char == 'l'){
 			lives+=5;
 		}
 		/*It also captures the entire keyboard if you want to do something with that input
@@ -138,7 +131,7 @@ var Level1 =
 	    }
 	},
 	cheatFunct: function(){
-		state = "CHEAT";
+		stateVar = "CHEAT";
 		if(game.paused){
 			this.removeButton(resumeBtn)
 			this.removeButton(lifeBtn)
@@ -150,6 +143,9 @@ var Level1 =
 			this.pauseFunct();
 		}//if not paused, pause and make menu
 		else{
+		//Lots of placeholders to demonstrate possible button placements. 
+		//For X, use centerX, X+360, X-360
+		//for Y, Add 150 between each button.
 		this.pauseFunct("Cheats");
 		resumeBtn = this.createButton("Resume",game.world.centerX,game.world.centerY+900,
 						 300, 100, this.cheatFunct);
@@ -170,7 +166,7 @@ var Level1 =
 	},
 	//if game's already paused/over, don't unpause it cause you lost
 	gameOver: function(){
-		state = "END";
+		stateVar = "END";
 		if(game.paused){
 			console.log("Game over");
 		}//if not paused, pause and make menu
@@ -184,7 +180,7 @@ var Level1 =
 	},
 	//if paused, remove buttons and pause screen
 	pauseMenu: function(){
-		state = "PAUSE";
+		stateVar = "PAUSE";
 		if(game.paused){
 			this.removeButton(resumeBtn)
 			this.removeButton(menuBtn)
@@ -206,7 +202,7 @@ var Level1 =
 		if(game.paused){
 			pauseScreen.kill();
 			pauseText.kill();
-			state = "RUN";
+			stateVar = "RUNNING";
 			game.paused = false;
 		}//if not paused, pause and make menu
 		else{

@@ -165,7 +165,7 @@ var Level1 =
 		dieBtn = this.createButton("Lose lives???",game.world.centerX+360,game.world.centerY+180, 
 						300, 100, function(){lives-=5;});
 		scoreBtn = this.createButton("Increase score",game.world.centerX+360,game.world.centerY+330, 
-						300, 100, function(){score+= 500;});
+						300, 100, function(){score+= 12345;});
 		speedBtn = this.createButton("Go fast",game.world.centerX-360,game.world.centerY+30, 
 						300, 100, function(){moveSpeedMultiplier = 2;});
 		slowBtn = this.createButton("Go slow???",game.world.centerX-360,game.world.centerY+180, 
@@ -189,8 +189,8 @@ var Level1 =
 		else{
 		this.pauseFunct(" Game\n Over", 250, null, game.world.centerY-900);
 		var string = "Score:" + score;
-		scoreText = game.add.text(game.world.centerX-this.scaleX(string, 60), game.world.centerY-200,
-						 string, {font:"120px Verdana", fill: "#FFF",align:"left"})
+		scoreText = game.add.text(game.world.centerX-this.scaleX(string, 40), game.world.centerY-200,
+						 string, {font:"120px Verdana", fill: "#FFF",align:"center"})
 
 		restartBtn = this.createButton("Restart",game.world.centerX,game.world.centerY+292,
 						 300, 100, function(){game.state.start('Level1'); game.paused = false;});

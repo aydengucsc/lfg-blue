@@ -31,10 +31,8 @@ var Level1 =
 		//temporary? pause button
 		//it's not killed when we pause, just covered. You can still click it to unpause.
 		//Intentional. This makes testing easier
-		this.createButton("Pause",game.world.centerX*1.65, 100, 300, 100, this.pauseFunct);
-		this.createButton("Cheat!",game.world.centerX*1.65, 225, 300, 100, function(){console.log("Cheating time")});
-		// stateText = game.add.text(game.world.centerX-475,game.world.centerY-600,"",{font:"250px Verdana", fill: "#FFF",align:"center"});
-		// stateText.visible = false;
+		this.createButton("Pause",game.world.centerX*1.65, 100, 300, 100, this.pauseMenu);
+		this.createButton("Cheat!",game.world.centerX*1.65, 225, 300, 100, this.cheatFunct);
 
 		scoreString = 'ScoreTest : ';
 		scoreName = game.add.text(10,10, scoreString + score, {font: '40px Arial', fill:'#fff'});
@@ -63,7 +61,7 @@ var Level1 =
 
 		//lives
 	    lives = 3;
-	    lifeCounter = game.add.text(60, game.world.height - 75, 'X ' + lives, { font: '60px Arial', fill: '#fff' });
+	    lifeCounter = game.add.text(60, game.world.height - 75, 'X ' + lives, { font: '60px Arial', fill: '#fff', aligh: "right"});
 		lifeCount = game.add.sprite(5, game.world.height-68, 'triangle');
 	        lifeCount.scale.setTo(0.1,0.1);
 	        //count.alpha = 0.4;
@@ -102,10 +100,13 @@ var Level1 =
 	//Press the P button to pause
 	pressFunct: function(char){
 		if(char === 'p'){
-			this.pauseFunct();
+			this.pauseMenu();
 		}
 		if(char === 'k'){
 			this.killFunct();
+		}
+		if(char === 'l'){
+			lives+=5;
 		}
 		if(char === 'r' && game.paused){
 			game.state.start('Level1');
@@ -117,42 +118,63 @@ var Level1 =
 		 *console.log("You pressed: ", char);
 		 */
 	},
-	killFunct: function(char){
-	    if (lives>0)
+	killFunct: function(){
+	    if (lives>-1)
 	    {
 			var explosion = explosions.getFirstExists(false);
 		    explosion.reset(sprite.body.x, sprite.body.y);
 		    explosion.play('explode', 30, false, true);
 		    lives--;
 	    }
-	    else console.log("Game over");
+	    if (lives == -1){
+	    	lives = 0;
+		    this.gameOver();
+		    sprite.visible = false;
+	    }
 	},
-	//if paused, unpause and remove pause menu
-	pauseFunct: function(){
+	cheatFunct: function(){
+		console.log("Cheating time");
+	},
+	//if game's already paused/over, don't unpause it cause you lost
+	gameOver: function(){
 		if(game.paused){
-			// stateText.visible = false;
-			// pauseScreen.visible = false;
-			
-			pauseScreen.kill();
-			pauseText.kill();
+			console.log("Game over");
+		}//if not paused, pause and make menu
+		else{
+		console.log("Game over");
+		this.pauseFunct(" Game\n Over");
+		restartBtn = this.createButton("Restart",game.world.centerX,game.world.centerY+292, 300, 100, function(){game.state.start('Level1'); game.paused = false;});
+		menuBtn = this.createButton("Menu",game.world.centerX,game.world.centerY+132, 300, 100, function(){game.state.start('MainMenu'); game.paused = false;});
+		}
+	},
+	//if paused, remove buttons and pause screen
+	pauseMenu: function(){
+		if(game.paused){
 			this.removeButton(resumeBtn)
 			this.removeButton(menuBtn)
 			this.removeButton(restartBtn)
-			
-			game.paused = false;
+			this.pauseFunct();
 		}//if not paused, pause and make menu
 		else{
-		console.log("pause: ", test);
-		game.paused = true;
-
-		// stateText.text = "Paused!";
-		// stateText.visible = true;
-		// pauseScreen.visible = true;
-		pauseScreen = game.add.sprite(0, 0, 'pause');
-		pauseText = game.add.text(game.world.centerX-475,game.world.centerY-600,"Paused!",{font:"250px Verdana", fill: "#FFF",align:"center"});
+		this.pauseFunct("Paused!");
 		resumeBtn = this.createButton("Resume",game.world.centerX+275,game.world.centerY+32, 300, 100, this.pauseFunct);
 		restartBtn = this.createButton("Restart",game.world.centerX+275,game.world.centerY+192, 300, 100, function(){game.state.start('Level1'); game.paused = false;});
 		menuBtn = this.createButton("Menu",game.world.centerX-275,game.world.centerY+32, 300, 100, function(){game.state.start('MainMenu'); game.paused = false;});
+		}
+	},
+	//if paused, unpause and remove pause screen
+	pauseFunct: function(string){
+		if(game.paused){
+			pauseScreen.kill();
+			pauseText.kill();
+			game.paused = false;
+		}//if not paused, pause and make menu
+		else{
+		console.log(string ,": ", test);
+		game.paused = true;
+
+		pauseScreen = game.add.sprite(0, 0, 'pause');
+		pauseText = game.add.text(game.world.centerX-475,game.world.centerY-600,string,{font:"250px Verdana", fill: "#FFF",align:"center"});
 		}
 	},
 	//aydeng's createButton, modified to return the button&text so we can kill() them later.

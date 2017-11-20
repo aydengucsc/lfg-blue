@@ -4,7 +4,7 @@ var cursors;
 var bulletTime = 0;
 var bullet;
 var lives;
-var stateText;
+var state;
 var Level1 = 
 {
 	preload: function()
@@ -97,20 +97,26 @@ var Level1 =
 
 	    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) this.fireBullet();
 	},
-	//Press the P button to pause
+	//handles button presses
 	pressFunct: function(char){
-		if(char === 'p'){
+		if(char === 'p' && state != "CHEAT" && state != "END"){
 			this.pauseMenu();
-		}
-		if(char === 'k'){
-			this.killFunct();
-		}
-		if(char === 'l'){
-			lives+=5;
 		}
 		if(char === 'r' && game.paused){
 			game.state.start('Level1');
 			game.paused = false;
+		}
+		if(char === 'c' && game.paused && state!= "END"){
+			if (state == "PAUSE")this.pauseMenu();
+			this.cheatFunct();
+		}
+		//debug kill
+		if(char === 'k'){
+			this.killFunct();
+		}
+		//cheat: live + 5
+		if(char === 'l'){
+			lives+=5;
 		}
 		/*It also captures the entire keyboard if you want to do something with that input
 		 *NOTE: Don't use this for game stuff like movement and actions, etc!
@@ -126,29 +132,59 @@ var Level1 =
 		    explosion.play('explode', 30, false, true);
 		    lives--;
 	    }
-	    if (lives == -1){
-	    	lives = 0;
+	    if (lives < 0){
 		    this.gameOver();
 		    sprite.visible = false;
 	    }
 	},
 	cheatFunct: function(){
-		console.log("Cheating time");
+		state = "CHEAT";
+		if(game.paused){
+			this.removeButton(resumeBtn)
+			this.removeButton(lifeBtn)
+			this.removeButton(dieBtn)
+			this.removeButton(placeholderBtn)
+			this.removeButton(placeholderBtn2)
+			this.removeButton(placeholderBtn3)
+			this.removeButton(placeholderBtn4)
+			this.pauseFunct();
+		}//if not paused, pause and make menu
+		else{
+		this.pauseFunct("Cheats");
+		resumeBtn = this.createButton("Resume",game.world.centerX,game.world.centerY+900,
+						 300, 100, this.cheatFunct);
+		lifeBtn = this.createButton("More lives?",game.world.centerX+360,game.world.centerY+30,
+						 300, 100, function(){lives+=5;});
+		dieBtn = this.createButton("Lose lives???",game.world.centerX,game.world.centerY+30, 
+						300, 100, function(){lives-=5;});
+		placeholderBtn = this.createButton("idk",game.world.centerX-360,game.world.centerY+30, 
+						300, 100, function(){console.log("I dunno what else to cheat with");});
+		placeholderBtn2 = this.createButton("really idk",game.world.centerX,game.world.centerY+180, 
+						300, 100, function(){console.log("hello world");});
+		placeholderBtn3 = this.createButton("hi",game.world.centerX,game.world.centerY+330, 
+						300, 100, function(){console.log("placeholder");});
+
+		placeholderBtn4 = this.createButton("no",game.world.centerX,game.world.centerY+480, 
+						300, 100, function(){console.log("ajdfkgh");});
+		}
 	},
 	//if game's already paused/over, don't unpause it cause you lost
 	gameOver: function(){
+		state = "END";
 		if(game.paused){
 			console.log("Game over");
 		}//if not paused, pause and make menu
 		else{
-		console.log("Game over");
 		this.pauseFunct(" Game\n Over");
-		restartBtn = this.createButton("Restart",game.world.centerX,game.world.centerY+292, 300, 100, function(){game.state.start('Level1'); game.paused = false;});
-		menuBtn = this.createButton("Menu",game.world.centerX,game.world.centerY+132, 300, 100, function(){game.state.start('MainMenu'); game.paused = false;});
+		restartBtn = this.createButton("Restart",game.world.centerX,game.world.centerY+292,
+						 300, 100, function(){game.state.start('Level1'); game.paused = false;});
+		menuBtn = this.createButton("Menu",game.world.centerX,game.world.centerY+132, 300,
+						 100, function(){game.state.start('MainMenu'); game.paused = false;});
 		}
 	},
 	//if paused, remove buttons and pause screen
 	pauseMenu: function(){
+		state = "PAUSE";
 		if(game.paused){
 			this.removeButton(resumeBtn)
 			this.removeButton(menuBtn)
@@ -157,9 +193,12 @@ var Level1 =
 		}//if not paused, pause and make menu
 		else{
 		this.pauseFunct("Paused!");
-		resumeBtn = this.createButton("Resume",game.world.centerX+275,game.world.centerY+32, 300, 100, this.pauseFunct);
-		restartBtn = this.createButton("Restart",game.world.centerX+275,game.world.centerY+192, 300, 100, function(){game.state.start('Level1'); game.paused = false;});
-		menuBtn = this.createButton("Menu",game.world.centerX-275,game.world.centerY+32, 300, 100, function(){game.state.start('MainMenu'); game.paused = false;});
+		resumeBtn = this.createButton("Resume",game.world.centerX+275,game.world.centerY+32,
+						 300, 100, this.pauseFunct);
+		restartBtn = this.createButton("Restart",game.world.centerX+275,game.world.centerY+192,
+						 300, 100, function(){game.state.start('Level1'); game.paused = false;});
+		menuBtn = this.createButton("Menu",game.world.centerX-275,game.world.centerY+32,
+						 300, 100, function(){game.state.start('MainMenu'); game.paused = false;});
 		}
 	},
 	//if paused, unpause and remove pause screen
@@ -167,6 +206,7 @@ var Level1 =
 		if(game.paused){
 			pauseScreen.kill();
 			pauseText.kill();
+			state = "RUN";
 			game.paused = false;
 		}//if not paused, pause and make menu
 		else{
@@ -174,7 +214,8 @@ var Level1 =
 		game.paused = true;
 
 		pauseScreen = game.add.sprite(0, 0, 'pause');
-		pauseText = game.add.text(game.world.centerX-475,game.world.centerY-600,string,{font:"250px Verdana", fill: "#FFF",align:"center"});
+		pauseText = game.add.text(game.world.centerX-475,game.world.centerY-600,
+			string,{font:"250px Verdana", fill: "#FFF",align:"center"});
 		}
 	},
 	//aydeng's createButton, modified to return the button&text so we can kill() them later.

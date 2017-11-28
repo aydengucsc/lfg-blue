@@ -44,7 +44,7 @@ var Level1 =
 	    bullets.enableBody = true;
 	    bullets.physicsBodyType = Phaser.Physics.ARCADE;
 
-	    for (var i = 0; i < 600; i++)
+	    for (var i = 0; i < 100; i++)
 	    {
 	        var b = bullets.create(0, 0, 'bullet');
 	        b.name = 'bullet' + i;

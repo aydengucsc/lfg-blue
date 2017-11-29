@@ -62,9 +62,9 @@ var Level1 =
 
 		//lives
 	    lives = 1;
-	    lifeCounter = game.add.text(60, game.world.height - 75, 'X ' + lives, { font: '60px Arial', fill: '#fff', aligh: "right"});
-		lifeCount = game.add.sprite(5, game.world.height-68, 'triangle');
-	        lifeCount.scale.setTo(0.1,0.1);
+	    lifeCounter = game.add.text(70, game.world.height - 75, 'X ' + lives, { font: '60px Arial', fill: '#fff', aligh: "right"});
+		lifeCount = game.add.sprite(0, game.world.height-70, 'triangle');
+	        lifeCount.scale.setTo(0.08,0.08);
 	        //count.alpha = 0.4;
 
 	    //boom
@@ -215,7 +215,7 @@ var Level1 =
 		else{
 		this.pauseFunct("Paused!", 250);
 		resumeBtn = this.createButton("Resume",game.world.centerX+275,game.world.centerY+32,
-						 300, 100, this.pauseFunct);
+						 300, 100, this.pauseMenu);
 		restartBtn = this.createButton("Restart",game.world.centerX+275,game.world.centerY+192,
 						 300, 100, function(){game.state.start('Level1'); game.paused = false;});
 		menuBtn = this.createButton("Menu",game.world.centerX-275,game.world.centerY+32,
@@ -272,7 +272,7 @@ var Level1 =
 	        shootDelay = 50 / shootSpeedMultiplier;
 	        if (bullet)
 	        {
-	            bullet.reset(sprite.x, sprite.y);
+	            bullet.reset(sprite.x-10, sprite.y-60);
 	            bullet.body.velocity.y = -1200;
 	            bulletTime = game.time.now +shootDelay;
 	        }

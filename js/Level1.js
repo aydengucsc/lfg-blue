@@ -38,14 +38,14 @@ var Level1 =
 		game.input.keyboard.addCallbacks(this, null, null, this.pressFunct);
 		//test text that increments per frame so we can test the pause menu.
 		//Feel free to remove when we actually have a game.
-		testText = game.add.text(game.world.centerX-475,game.world.centerY-400,"Game up:" + test,{font:"100px Verdana", fill: "#fff"});
+		testText = game.add.text(game.world.centerX-465,game.world.centerY-800,"Game up:" + test,{font:"50px Verdana", fill: "#fff"});
 		
 	 	bullets = game.add.group();
 	    bullets.enableBody = true;
 	    bullets.physicsBodyType = Phaser.Physics.ARCADE;
 
-	    for (var i = 0; i < 100; i++)
-	    {
+	    for (var i = 0; i < 50; i++)
+	    { 
 	        var b = bullets.create(0, 0, 'bullet');
 	        b.name = 'bullet' + i;
 	        b.exists = false;
@@ -84,7 +84,7 @@ var Level1 =
 	{
 		scoreName.text = scoreString + score;
 		test++;
-		testText.text = "Game up:" + test;
+		testText.text = "Level Counter: " + test;
 		lifeCounter.text = "X " + lives;
 
 		sprite.body.velocity.x = 0;

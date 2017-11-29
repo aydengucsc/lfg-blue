@@ -15,7 +15,8 @@ var Preloader = {
 		game.load.image('background', 'assets/images/Level1.png');
 		game.load.image('triangle', 'assets/images/triangle.png');
 		game.load.image('bullet', 'assets/images/bullet.png');
-
+		//enemies
+		game.load.image('enemy', 'assets/images/triangle.png');
 		//temporary assets borrowed from phaser examples
 		game.load.spritesheet('explode', 'assets/images/explode.png', 128, 128);
 		

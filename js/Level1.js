@@ -7,13 +7,20 @@ var MAX_ENEMY = 5;
 //var moveSpeedMultiplier = 1;
 var lives;
 //var stateVar;
-var Missile = function(game, x, y) 
+var Enemy = 
 {
-    Phaser.Sprite.call(this, game, x, y, 'enemy');
-    this.anchor.setTo(0.5, 0.5);
-    this.game.physics.enable(this, Phaser.Physics.ARCADE);
-    this.SPEED = 250;
+	function(game, x, y) 
+	{
+		Phaser.Sprite.call(this, game, x, y, 'enemy');
+		this.anchor.setTo(0.5, 0.5);
+		this.game.physics.enable(this, Phaser.Physics.ARCADE);
+		this.SPEED = 250;
+	}
 }
+Enemy = Object.create(Phaser.Sprite);
+Enemy.constructor = Enemy;
+
+//Constructor of Level1 Phase
 var Level1 = 
 {
 	preload: function()
@@ -81,17 +88,11 @@ var Level1 =
 		cursors = game.input.keyboard.createCursorKeys();
 		game.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ]);
 	},
-	setupBoom: function(boom) 
-	{
-		boom.anchor.x = 0.3;
-		boom.anchor.y = 0.3;
-		boom.animations.add('explode');
-	},
 	update: function()
 	{
 		if (enemyGroup.countLiving() < MAX_ENEMY) 
 		{
-			launchEnemy(game.rnd.integerInRange(50, this.game.width-50), 0);
+			this.launchEnemy(game.rnd.integerInRange(50, this.game.width-50), 0);
 		}
 		scoreName.text = scoreString + score;
 		test++;
@@ -107,6 +108,12 @@ var Level1 =
 	    if (cursors.down.isDown) sprite.body.velocity.y = speed;
 
 	    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) this.fireBullet();
+	},
+	setupBoom: function(boom) 
+	{
+		boom.anchor.x = 0.3;
+		boom.anchor.y = 0.3;
+		boom.animations.add('explode');
 	},
 	//handles button presses
 	pressFunct: function(char){
@@ -291,7 +298,7 @@ var Level1 =
 	},
 	launchEnemy : function(x, y) 
 	{
-    // // Get the first dead missile from the missileGroup
+    // // Get the first dead enemy from the enemyGroup
     var enemy = enemyGroup.getFirstDead();
 
     // If there aren't any available, create a new one
@@ -303,7 +310,7 @@ var Level1 =
     enemy.x = x;
     enemy.y = y;
 
-    return missile;
+    return enemy;
 	}
 };
 // Level1.prototype =

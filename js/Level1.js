@@ -3,12 +3,17 @@ var bullets;
 var cursors;
 var bulletTime = 0;
 var bullet;
-
+var MAX_ENEMY = 5;
 //var moveSpeedMultiplier = 1;
-
 var lives;
 //var stateVar;
-
+var Missile = function(game, x, y) 
+{
+    Phaser.Sprite.call(this, game, x, y, 'enemy');
+    this.anchor.setTo(0.5, 0.5);
+    this.game.physics.enable(this, Phaser.Physics.ARCADE);
+    this.SPEED = 250;
+}
 var Level1 = 
 {
 	preload: function()
@@ -58,9 +63,7 @@ var Level1 =
 	    }
 
 		sprite = game.add.sprite(game.world.centerX, game.world.centerY * 1.8, 'triangle');
-		enemy = game.add.sprite(game.world.centerX, game.world.centerY, 'enemy');
 		sprite.scale.setTo(0.1,0.1);
-		enemy.scale.setTo(0.1,0.1);
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
 
 		//lives
@@ -78,15 +81,18 @@ var Level1 =
 		cursors = game.input.keyboard.createCursorKeys();
 		game.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ]);
 	},
-	setupBoom: function(boom) {
-
-    boom.anchor.x = 0.3;
-    boom.anchor.y = 0.3;
-    boom.animations.add('explode');
-
+	setupBoom: function(boom) 
+	{
+		boom.anchor.x = 0.3;
+		boom.anchor.y = 0.3;
+		boom.animations.add('explode');
 	},
 	update: function()
 	{
+		if (enemyGroup.countLiving() < MAX_ENEMY) 
+		{
+			launchEnemy(game.rnd.integerInRange(50, this.game.width-50), 0);
+		}
 		scoreName.text = scoreString + score;
 		test++;
 		testText.text = "Level Counter: " + test;
@@ -94,7 +100,7 @@ var Level1 =
 
 		sprite.body.velocity.x = 0;
 	    sprite.body.velocity.y = 0;
-	    speed = 300 * moveSpeedMultiplier;
+	    speed = 500 * moveSpeedMultiplier;
 	    if (cursors.left.isDown) sprite.body.velocity.x = -speed;
 	    if (cursors.right.isDown) sprite.body.velocity.x = speed;
 	    if (cursors.up.isDown) sprite.body.velocity.y = -speed;
@@ -273,6 +279,7 @@ var Level1 =
 	        if (bullet)
 	        {
 	            bullet.reset(sprite.x, sprite.y);
+				bullet.anchor.setTo(0.5, 0.5);
 	            bullet.body.velocity.y = -1200;
 	            //console.log("Fired shot:" + test);
 	            bulletTime = game.time.now +shootDelay;
@@ -281,6 +288,22 @@ var Level1 =
 	},
 	resetBullet : function(bullet) {
 		bullet.kill();
+	},
+	launchEnemy : function(x, y) 
+	{
+    // // Get the first dead missile from the missileGroup
+    var enemy = enemyGroup.getFirstDead();
+
+    // If there aren't any available, create a new one
+    if (enemy === null) {
+        enemy = new Enemy(game);
+        enemyGroup.add(enemy);
+    }
+    enemy.revive();
+    enemy.x = x;
+    enemy.y = y;
+
+    return missile;
 	}
 };
 // Level1.prototype =

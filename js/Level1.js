@@ -8,6 +8,17 @@ var enemy;
 var lives;
 //var stateVar;
 
+//Enemy constructor: PLEASE HELP
+var Enemy = function(game, x, y) {
+    Phaser.Sprite.call(this, game, x, y, 'enemy');
+    this.anchor.setTo(0.5, 0.5);
+    game.physics.enable(this, Phaser.Physics.ARCADE);
+    this.SPEED = 250;
+};
+
+Enemy = Object.create(Phaser.Sprite.prototype);
+Enemy.constructor = Enemy;
+
 //Constructor of Level1 Phase
 var Level1 = 
 {
@@ -16,7 +27,13 @@ var Level1 =
 	
 	preload: function()
 	{
-		//Preloading stuff moved to preloader.js
+		//Level1 assets
+		game.load.image('background', 'assets/images/Level1.png');
+		game.load.image('triangle', 'assets/images/triangle.png');
+		game.load.image('bullet', 'assets/images/bullet.png');
+		game.load.image('enemy', 'assets/images/enemy.png');
+		//temporary assets borrowed from phaser examples
+		game.load.spritesheet('explode', 'assets/images/explode.png', 128, 128);
  	},
 	create: function()
 	{
@@ -45,7 +62,7 @@ var Level1 =
 	    bullets.enableBody = true;
 	    bullets.physicsBodyType = Phaser.Physics.ARCADE;
 
-	    for (var i = 0; i < 50; i++)
+	    for (var i = 0; i < 200; i++)
 	    { 
 	        var b = bullets.create(0, 0, 'bullet');
 	        b.name = 'bullet' + i;
@@ -59,10 +76,13 @@ var Level1 =
 		sprite.anchor.setTo(0.5, 0.5);
 		sprite.scale.setTo(0.1,0.1);
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
+		
+		
+		game.add.existing(new Enemy(this.game, this.game.width/2, 0));
 
 		//lives
 	    lives = 1;
-	    lifeCounter = game.add.text(70, game.world.height - 75, 'X ' + lives, { font: '60px Arial', fill: '#fff', aligh: "right"});
+	    lifeCounter = game.add.text(70, game.world.height - 75, 'X ' + lives, { font: '60px Arial', fill: '#fff', align: "right"});
 		lifeCount = game.add.sprite(0, game.world.height-70, 'triangle');
 	        lifeCount.scale.setTo(0.08,0.08);
 	        //count.alpha = 0.4;
@@ -91,7 +111,6 @@ var Level1 =
 	    if (cursors.down.isDown) sprite.body.velocity.y = speed;
 	    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) this.fireBullet();
 	},
-	
 	
 	//Additional Functions
 	
@@ -260,6 +279,7 @@ var Level1 =
 		object[0].kill();
 		object[1].kill();
 	},
+	enemySpawn:
 	scaleX:function(string, fontsize)
 	{
 		x = string.length * fontsize;

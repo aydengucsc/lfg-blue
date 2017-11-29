@@ -14,7 +14,3 @@ var Boot =
 
 	}
 };
-// Boot.prototype =
-// {
-	
-// };

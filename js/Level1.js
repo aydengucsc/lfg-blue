@@ -3,31 +3,20 @@ var bullets;
 var cursors;
 var bulletTime = 0;
 var bullet;
-var MAX_ENEMY = 5;
+var enemy;
 //var moveSpeedMultiplier = 1;
 var lives;
 //var stateVar;
-var Enemy = 
-{
-	function(game, x, y) 
-	{
-		Phaser.Sprite.call(this, game, x, y, 'enemy');
-		this.anchor.setTo(0.5, 0.5);
-		this.game.physics.enable(this, Phaser.Physics.ARCADE);
-		this.SPEED = 250;
-	}
-}
-Enemy = Object.create(Phaser.Sprite);
-Enemy.constructor = Enemy;
 
 //Constructor of Level1 Phase
 var Level1 = 
 {
+	
+	//Main Functions
+	
 	preload: function()
 	{
 		//Preloading stuff moved to preloader.js
-		enemyGroup = game.add.group();
-
  	},
 	create: function()
 	{
@@ -37,16 +26,13 @@ var Level1 =
 		score = 0;
 		// var scoreName;
 		// var scoreString = '';
-		
-		console.log("Lv.1");
 		test = 0;
-		background = game.add.sprite(0, 0, 'background');
+		background = this.game.add.sprite(0, 0, 'background');
 		//temporary? pause button
 		//it's not killed when we pause, just covered. You can still click it to unpause.
 		//Intentional. This makes testing easier
 		this.createButton("Pause",game.world.centerX*1.65, 100, 300, 100, this.pauseMenu);
-		this.createButton("Cheat!",game.world.centerX*1.65, 225, 300, 100, this.cheatFunct);
-		
+		this.createButton("Dev Mode",game.world.centerX*1.65, 225, 300, 100, this.cheatFunct);
 
 		scoreString = 'Score: ';
 		scoreName = game.add.text(10,10, scoreString + score, {font: '40px Arial', fill:'#fff'});
@@ -70,6 +56,7 @@ var Level1 =
 	    }
 
 		sprite = game.add.sprite(game.world.centerX, game.world.centerY * 1.8, 'triangle');
+		sprite.anchor.setTo(0.5, 0.5);
 		sprite.scale.setTo(0.1,0.1);
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
 
@@ -90,10 +77,6 @@ var Level1 =
 	},
 	update: function()
 	{
-		if (enemyGroup.countLiving() < MAX_ENEMY) 
-		{
-			this.launchEnemy(game.rnd.integerInRange(50, this.game.width-50), 0);
-		}
 		scoreName.text = scoreString + score;
 		test++;
 		testText.text = "Level Counter: " + test;
@@ -106,9 +89,12 @@ var Level1 =
 	    if (cursors.right.isDown) sprite.body.velocity.x = speed;
 	    if (cursors.up.isDown) sprite.body.velocity.y = -speed;
 	    if (cursors.down.isDown) sprite.body.velocity.y = speed;
-
 	    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) this.fireBullet();
 	},
+	
+	
+	//Additional Functions
+	
 	setupBoom: function(boom) 
 	{
 		boom.anchor.x = 0.3;
@@ -116,7 +102,8 @@ var Level1 =
 		boom.animations.add('explode');
 	},
 	//handles button presses
-	pressFunct: function(char){
+	pressFunct: function(char)
+	{
 		if(char == 'p' && stateVar != "CHEAT" && stateVar != "END"){
 			this.pauseMenu();
 		}
@@ -286,34 +273,12 @@ var Level1 =
 	        if (bullet)
 	        {
 	            bullet.reset(sprite.x, sprite.y);
-				bullet.anchor.setTo(0.5, 0.5);
 	            bullet.body.velocity.y = -1200;
-	            //console.log("Fired shot:" + test);
 	            bulletTime = game.time.now +shootDelay;
 	        }
 	    }
 	},
 	resetBullet : function(bullet) {
 		bullet.kill();
-	},
-	launchEnemy : function(x, y) 
-	{
-    // // Get the first dead enemy from the enemyGroup
-    var enemy = enemyGroup.getFirstDead();
-
-    // If there aren't any available, create a new one
-    if (enemy === null) {
-        enemy = new Enemy(game);
-        enemyGroup.add(enemy);
-    }
-    enemy.revive();
-    enemy.x = x;
-    enemy.y = y;
-
-    return enemy;
 	}
 };
-// Level1.prototype =
-// {
-	
-// };

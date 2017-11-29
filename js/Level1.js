@@ -14,6 +14,8 @@ var Level1 =
 	preload: function()
 	{
 		//Preloading stuff moved to preloader.js
+		enemyGroup = game.add.group();
+
  	},
 	create: function()
 	{
@@ -32,6 +34,7 @@ var Level1 =
 		//Intentional. This makes testing easier
 		this.createButton("Pause",game.world.centerX*1.65, 100, 300, 100, this.pauseMenu);
 		this.createButton("Cheat!",game.world.centerX*1.65, 225, 300, 100, this.cheatFunct);
+		
 
 		scoreString = 'Score: ';
 		scoreName = game.add.text(10,10, scoreString + score, {font: '40px Arial', fill:'#fff'});
@@ -54,12 +57,14 @@ var Level1 =
 	        b.events.onOutOfBounds.add(this.resetBullet, this);
 	    }
 
-		sprite = game.add.sprite(game.world.centerX, game.world.centerY * 1.8, 'triangle')
+		sprite = game.add.sprite(game.world.centerX, game.world.centerY * 1.8, 'triangle');
+		enemy = game.add.sprite(game.world.centerX, game.world.centerY, 'enemy');
 		sprite.scale.setTo(0.1,0.1);
+		enemy.scale.setTo(0.1,0.1);
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
 
 		//lives
-	    lives = 3;
+	    lives = 1;
 	    lifeCounter = game.add.text(60, game.world.height - 75, 'X ' + lives, { font: '60px Arial', fill: '#fff', aligh: "right"});
 		lifeCount = game.add.sprite(5, game.world.height-68, 'triangle');
 	        lifeCount.scale.setTo(0.1,0.1);
@@ -264,11 +269,11 @@ var Level1 =
 		if (game.time.now > bulletTime)
 	    {
 	        bullet = bullets.getFirstExists(false);
-	        shootDelay = 500 / shootSpeedMultiplier;
+	        shootDelay = 50 / shootSpeedMultiplier;
 	        if (bullet)
 	        {
-	            bullet.reset(sprite.x + 19, sprite.y - 16);
-	            bullet.body.velocity.y = -300;
+	            bullet.reset(sprite.x, sprite.y);
+	            bullet.body.velocity.y = -1200;
 	            //console.log("Fired shot:" + test);
 	            bulletTime = game.time.now +shootDelay;
 	        }

@@ -37,8 +37,10 @@ var Level1 =
  	},
 	create: function()
 	{
-		shootSpeedMultiplier = 1;
+		shootRateMultiplier = 1;
+		shotSpeedMultiplier = 1;
 		moveSpeedMultiplier = 1;
+
 		stateVar = "START";
 		score = 0;
 		test = 0;
@@ -152,45 +154,59 @@ var Level1 =
 		boom.animations.add('explode');
 	},
 	bulletHit: function(shot, victim) {
-	//kill both sprites
-    shot.kill();
-    victim.kill();
+		//kill both sprites
+	    shot.kill();
+	    victim.kill();
 
-    //Increase the score
-    score += 200;
-    scoreText.text = scoreString + score;
+	    //Increase the score
+	    score += 200;
+	    scoreText.text = scoreString + score;
 
-    //explode
-    var explosion = explosions.getFirstExists(false);
-    explosion.reset(victim.body.x+50, victim.body.y+50);
-    explosion.play('explode', 30, false, true);
+	    //explode
+	    var explosion = explosions.getFirstExists(false);
+	    explosion.reset(victim.body.x+50, victim.body.y+50);
+	    explosion.play('explode', 30, false, true);
 
-    //RNG to see if victim drops something
-    var i = game.rnd.integerInRange(0, 100);
-    if (i>60) this.enemyDrops(victim.body.x+50, victim.body.y+50);
+	    //RNG to see if victim drops something
+	    var i = game.rnd.integerInRange(0, 100);
+	    if (true) this.enemyDrops(victim.body.x+50, victim.body.y+50);
 	},
 	dropCollected: function(player, drop) {
-	//kill drop
-    drop.kill();
+		var dropType = 10* drop.tint/0xffffff;
+		//console.log("type was: "+dropType);
+		//kill drop
+	    drop.kill();
 
-    //Increase the score
-    score += 1000;
-    scoreText.text = scoreString + score;
+	    //Increase the score
+	    score += 1000;
+	    scoreText.text = scoreString + score;
 
-    //explode
-    var explosion = explosions.getFirstExists(false);
-    explosion.reset(player.body.x+50, player.body.y+50);
-    explosion.play('explode', 30, false, true);
+	    //explode
+	    var explosion = explosions.getFirstExists(false);
+	    explosion.reset(player.body.x+50, player.body.y+50);
+	    explosion.play('explode', 30, false, true);
 
-    //buff movespeed for example, we can do anything with this.
-    moveSpeedMultiplier+=0.5;
+	    //applies buff
+	    //if you come up with more buff ideas, simply add another case and make the range bigger in enemyDrops()
+	    switch(dropType){
+	    	case 1: moveSpeedMultiplier+=0.5; console.log("MOVE UP: " + moveSpeedMultiplier); break;
+	    	case 2: shotSpeedMultiplier+=0.5; console.log("SHOT SPEED UP: " + shotSpeedMultiplier); break;
+	    	case 3: shootRateMultiplier+=0.5; console.log("RATE UP: " + shootRateMultiplier); break;
+	    	case 4: score+=1337; console.log("SCORE UP: " + score); break;
+	    	default:break;
+	    }
 	},
 	enemyDrops: function(x, y){
 		drop = drops.getFirstExists(false);
        	if (drop)
 	        {
 	            drop.reset(x, y);
-	            drop.body.velocity.y = +400;
+	            drop.body.velocity.y = -200;
+	            drop.body.gravity.y = 300;
+	           	//if you have a new buff idea, make the range here bigger
+	            var i = game.rnd.integerInRange(1, 4)/10;
+	            //console.log("i = "+ i);
+	            drop.tint = i*0xffffff;
 	        }
 	},
 	killFunct: function(){
@@ -210,11 +226,11 @@ var Level1 =
 		if (game.time.now > bulletTime)
 	    {
 	        bullet = bullets.getFirstExists(false);
-	        shootDelay = 50 / shootSpeedMultiplier;
+	        shootDelay = 50 / shootRateMultiplier;
 	        if (bullet)
 	        {
 	            bullet.reset(sprite.x-4, sprite.y-60);
-	            bullet.body.velocity.y = -1200;
+	            bullet.body.velocity.y = -1000;
 	            bulletTime = game.time.now +shootDelay;
 	        }
 	    }
@@ -370,5 +386,10 @@ var Level1 =
 		 *This will fire even if the game is paused.
 		 *console.log("You pressed: ", char);
 		 */
+	},
+	scaleX:function(string, fontsize)
+	{
+		x = string.length * fontsize;
+		return x;
 	}
 };

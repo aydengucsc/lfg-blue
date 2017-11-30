@@ -71,6 +71,7 @@ var Level1 =
 		sprite.anchor.setTo(0.5, 0.5);
 		sprite.scale.setTo(0.1,0.1);
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
+		sprite.body.collideWorldBounds = true;
 
 		//FIX THIS
 		//Only the rightmost enemy is killable.

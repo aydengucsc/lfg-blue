@@ -8,13 +8,13 @@ var lives;
 // Enemy constructor
 Enemy = function(index, game, x, y) 
 {
-	this.enemy = game.add.sprite(x,y,'enemy');
-	this.enemy.scale.setTo(0.2,0.2);
-    this.enemy.anchor.setTo(0.5, 0.5);
-	this.enemy.name = index.toString();
-    game.physics.enable(this.enemy, Phaser.Physics.ARCADE);
-	this.enemy.body.immovable = true;
-	this.enemy.body.collideWorldBounds = true;
+	enemy = game.add.sprite(x,y,'enemy');
+	enemy.scale.setTo(0.2,0.2);
+    enemy.anchor.setTo(0.5, 0.5);
+	enemy.name = index.toString();
+    game.physics.enable(enemy, Phaser.Physics.ARCADE);
+	enemy.body.immovable = true;
+	enemy.body.collideWorldBounds = true;
 };
 
 //Constructor of Level1 Phase
@@ -38,8 +38,6 @@ var Level1 =
 		moveSpeedMultiplier = 1;
 		stateVar = "START";
 		score = 0;
-		// var scoreName;
-		// var scoreString = '';
 		test = 0;
 		background = this.game.add.sprite(0, 0, 'background');
 		//temporary? pause button
@@ -49,7 +47,7 @@ var Level1 =
 		this.createButton("Dev Mode",game.world.centerX*1.65, 225, 300, 100, this.cheatFunct);
 
 		scoreString = 'Score: ';
-		scoreName = game.add.text(10,10, scoreString + score, {font: '40px Arial', fill:'#fff'});
+		scoreText = game.add.text(10,10, scoreString + score, {font: '40px Arial', fill:'#fff'});
 		game.input.keyboard.addCallbacks(this, null, null, this.pressFunct);
 		//test text that increments per frame so we can test the pause menu.
 		//Feel free to remove when we actually have a game.
@@ -93,7 +91,7 @@ var Level1 =
 	},
 	update: function()
 	{
-		scoreName.text = scoreString + score;
+		scoreText.text = scoreString + score;
 		test++;
 		testText.text = "Level Counter: " + test;
 		lifeCounter.text = "X " + lives;
@@ -106,10 +104,24 @@ var Level1 =
 	    if (cursors.up.isDown) sprite.body.velocity.y = -speed;
 	    if (cursors.down.isDown) sprite.body.velocity.y = speed;
 	    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) this.fireBullet();
+	    game.physics.arcade.overlap(bullet, enemy, this.collisionHandler, null, this);
 	},
 	
 	//Additional Functions
-	
+	collisionHandler: function(bullet, enemy) {
+	//kill both sprites
+    bullet.kill();
+    enemy.kill();
+
+    //Increase the score
+    score += 200;
+    scoreText.text = scoreString + score;
+
+    //explode
+    var explosion = explosions.getFirstExists(false);
+    explosion.reset(enemy.body.x, enemy.body.y);
+    explosion.play('explode', 30, false, true);
+	},
 	setupBoom: function(boom) 
 	{
 		boom.anchor.x = 0.3;
@@ -159,6 +171,7 @@ var Level1 =
 	},
 	cheatFunct: function(){
 		stateVar = "CHEAT";
+		//if game's paused, clean up menu and resume
 		if(game.paused){
 			this.removeButton(resumeBtn)
 			this.removeButton(lifeBtn)
@@ -259,7 +272,6 @@ var Level1 =
 			string,{font:fontsize+"px Verdana", fill: "#FFF",align:"center"});
 		}
 	},
-	//aydeng's createButton, modified to return the button&text so we can kill() them later.
 	createButton:function(string,x,y,w,h,callback)
 	{
 		var button1 = game.add.button(x,y,'button',callback,this,2,1,0);

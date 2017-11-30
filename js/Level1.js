@@ -71,9 +71,12 @@ var Level1 =
 		sprite.anchor.setTo(0.5, 0.5);
 		sprite.scale.setTo(0.1,0.1);
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
-		
-		new Enemy(0,game,game.world.centerX,game.world.centerY);
 
+		//FIX THIS
+		//Only the rightmost enemy is killable.
+		for(var i = -3; i<1; i++){
+		new Enemy(0,game,game.world.centerX+ 150*i ,game.world.centerY);
+		}
 		//lives
 	    lives = 1;
 	    lifeCounter = game.add.text(70, game.world.height - 75, 'X ' + lives, { font: '60px Arial', fill: '#fff', align: "right"});
@@ -104,14 +107,15 @@ var Level1 =
 	    if (cursors.up.isDown) sprite.body.velocity.y = -speed;
 	    if (cursors.down.isDown) sprite.body.velocity.y = speed;
 	    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) this.fireBullet();
-	    game.physics.arcade.overlap(bullet, enemy, this.collisionHandler, null, this);
+
+	    game.physics.arcade.overlap(bullets, enemy, this.collisionHandler, null, this);
 	},
 	
 	//Additional Functions
-	collisionHandler: function(bullet, enemy) {
+	collisionHandler: function(shot, victim) {
 	//kill both sprites
-    bullet.kill();
-    enemy.kill();
+    shot.kill();
+    victim.kill();
 
     //Increase the score
     score += 200;
@@ -119,7 +123,7 @@ var Level1 =
 
     //explode
     var explosion = explosions.getFirstExists(false);
-    explosion.reset(enemy.body.x, enemy.body.y);
+    explosion.reset(enemy.body.x+50, enemy.body.y+50);
     explosion.play('explode', 30, false, true);
 	},
 	setupBoom: function(boom) 
@@ -294,7 +298,7 @@ var Level1 =
 	        shootDelay = 50 / shootSpeedMultiplier;
 	        if (bullet)
 	        {
-	            bullet.reset(sprite.x-10, sprite.y-60);
+	            bullet.reset(sprite.x-4, sprite.y-60);
 	            bullet.body.velocity.y = -1200;
 	            bulletTime = game.time.now +shootDelay;
 	        }

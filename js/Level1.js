@@ -31,6 +31,9 @@ var Level1 =
 		game.load.image('bullet', 'assets/images/bullet.png');
 		game.load.image('enemy', 'assets/images/enemy.png');
 		game.load.spritesheet('explode', 'assets/images/explode.png', 128, 128);
+
+		//placeholder image for enemy drops
+		game.load.image('drop', 'assets/images/doritos.png');
  	},
 	create: function()
 	{
@@ -53,6 +56,21 @@ var Level1 =
 		//Feel free to remove when we actually have a game.
 		testText = game.add.text(game.world.centerX-465,game.world.centerY-800,"Game up:" + test,{font:"50px Verdana", fill: "#fff"});
 		
+		//makes drops
+		drops = game.add.group();
+		drops.enableBody = true;
+		drops.physicsBodyType = Phaser.Physics.ARCADE;
+
+	    for (var i = 0; i < 100; i++)
+	    { 
+	        var d = drops.create(0, 0, 'drop');
+	        d.name = 'drop' + i;
+	        d.exists = false;
+	        d.visible = false;
+	        d.checkWorldBounds = true;
+	        d.events.onOutOfBounds.add(this.resetDrop, this);
+	    }
+		//makes bullets
 	 	bullets = game.add.group();
 	    bullets.enableBody = true;
 	    bullets.physicsBodyType = Phaser.Physics.ARCADE;
@@ -115,11 +133,25 @@ var Level1 =
 	    if (cursors.down.isDown) sprite.body.velocity.y = speed;
 	    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) this.fireBullet();
 
-	    game.physics.arcade.overlap(bullets, enemies, this.collisionHandler, null, this);
+	    game.physics.arcade.overlap(bullets, enemies, this.bulletHit, null, this);
+	    game.physics.arcade.overlap(drops, sprite, this.dropCollected, null, this);
 	},
-	
 	//Additional Functions
-	collisionHandler: function(shot, victim) {
+	makeEnemy: function(x, y){
+		var e = enemies.create(x,y, 'enemy');
+		e.name = "enemy" + enemies.length;
+		e.scale.setTo(0.2,0.2);
+		e.anchor.setTo(0.5, 0.5);
+		e.body.immovable = true;
+		e.body.collideWorldBounds = true;
+	},
+	setupBoom: function(boom) 
+	{
+		boom.anchor.x = 0.3;
+		boom.anchor.y = 0.3;
+		boom.animations.add('explode');
+	},
+	bulletHit: function(shot, victim) {
 	//kill both sprites
     shot.kill();
     victim.kill();
@@ -132,40 +164,34 @@ var Level1 =
     var explosion = explosions.getFirstExists(false);
     explosion.reset(victim.body.x+50, victim.body.y+50);
     explosion.play('explode', 30, false, true);
+
+    //RNG to see if victim drops something
+    var i = game.rnd.integerInRange(0, 100);
+    if (i>60) this.enemyDrops(victim.body.x+50, victim.body.y+50);
 	},
-	setupBoom: function(boom) 
-	{
-		boom.anchor.x = 0.3;
-		boom.anchor.y = 0.3;
-		boom.animations.add('explode');
+	dropCollected: function(player, drop) {
+	//kill drop
+    drop.kill();
+
+    //Increase the score
+    score += 1000;
+    scoreText.text = scoreString + score;
+
+    //explode
+    var explosion = explosions.getFirstExists(false);
+    explosion.reset(player.body.x+50, player.body.y+50);
+    explosion.play('explode', 30, false, true);
+
+    //buff movespeed for example, we can do anything with this.
+    moveSpeedMultiplier+=0.5;
 	},
-	//handles button presses
-	pressFunct: function(char)
-	{
-		if(char == 'p' && stateVar != "CHEAT" && stateVar != "END"){
-			this.pauseMenu();
-		}
-		if(char == 'r' && game.paused){
-			game.state.start('Level1');
-			game.paused = false;
-		}
-		if(char == 'c' && game.paused && stateVar!= "END"){
-			if (stateVar == "PAUSE")this.pauseMenu();
-			this.cheatFunct();
-		}
-		//debug kill
-		if(char == 'k'){
-			this.killFunct();
-		}
-		//cheat: live + 5
-		if(char == 'l'){
-			lives+=5;
-		}
-		/*It also captures the entire keyboard if you want to do something with that input
-		 *NOTE: Don't use this for game stuff like movement and actions, etc!
-		 *This will fire even if the game is paused.
-		 *console.log("You pressed: ", char);
-		 */
+	enemyDrops: function(x, y){
+		drop = drops.getFirstExists(false);
+       	if (drop)
+	        {
+	            drop.reset(x, y);
+	            drop.body.velocity.y = +400;
+	        }
 	},
 	killFunct: function(){
 	    if (lives>-1)
@@ -179,6 +205,25 @@ var Level1 =
 		    this.gameOver();
 		    sprite.visible = false;
 	    }
+	},
+	fireBullet: function() {
+		if (game.time.now > bulletTime)
+	    {
+	        bullet = bullets.getFirstExists(false);
+	        shootDelay = 50 / shootSpeedMultiplier;
+	        if (bullet)
+	        {
+	            bullet.reset(sprite.x-4, sprite.y-60);
+	            bullet.body.velocity.y = -1200;
+	            bulletTime = game.time.now +shootDelay;
+	        }
+	    }
+	},
+	resetBullet : function(bullet) {
+		bullet.kill();
+	},
+	resetDrop : function(drop) {
+		drop.kill();
 	},
 	cheatFunct: function(){
 		stateVar = "CHEAT";
@@ -298,28 +343,32 @@ var Level1 =
 		object[0].kill();
 		object[1].kill();
 	},
-	makeEnemy: function(x, y){
-			var e = enemies.create(x,y, 'enemy');
-			e.name = "enemy" + enemies.length;
-			e.scale.setTo(0.2,0.2);
-			e.anchor.setTo(0.5, 0.5);
-			e.body.immovable = true;
-			e.body.collideWorldBounds = true;
-	},
-	fireBullet: function() {
-		if (game.time.now > bulletTime)
-	    {
-	        bullet = bullets.getFirstExists(false);
-	        shootDelay = 50 / shootSpeedMultiplier;
-	        if (bullet)
-	        {
-	            bullet.reset(sprite.x-4, sprite.y-60);
-	            bullet.body.velocity.y = -1200;
-	            bulletTime = game.time.now +shootDelay;
-	        }
-	    }
-	},
-	resetBullet : function(bullet) {
-		bullet.kill();
+	//handles button presses
+	pressFunct: function(char)
+	{
+		if(char == 'p' && stateVar != "CHEAT" && stateVar != "END"){
+			this.pauseMenu();
+		}
+		if(char == 'r' && game.paused){
+			game.state.start('Level1');
+			game.paused = false;
+		}
+		if(char == 'c' && game.paused && stateVar!= "END"){
+			if (stateVar == "PAUSE")this.pauseMenu();
+			this.cheatFunct();
+		}
+		//debug kill
+		if(char == 'k'){
+			this.killFunct();
+		}
+		//cheat: live + 5
+		if(char == 'l'){
+			lives+=5;
+		}
+		/*It also captures the entire keyboard if you want to do something with that input
+		 *NOTE: Don't use this for game stuff like movement and actions, etc!
+		 *This will fire even if the game is paused.
+		 *console.log("You pressed: ", char);
+		 */
 	}
 };

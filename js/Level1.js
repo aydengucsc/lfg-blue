@@ -3,21 +3,19 @@ var bullets;
 var cursors;
 var bulletTime = 0;
 var bullet;
-var enemy;
-//var moveSpeedMultiplier = 1;
 var lives;
-//var stateVar;
 
-//Enemy constructor: PLEASE HELP
-var Enemy = function(game, x, y) {
-    Phaser.Sprite.call(this, game, x, y, 'enemy');
-    this.anchor.setTo(0.5, 0.5);
-    game.physics.enable(this, Phaser.Physics.ARCADE);
-    this.SPEED = 250;
+// Enemy constructor
+Enemy = function(index, game, x, y) 
+{
+	this.enemy = game.add.sprite(x,y,'enemy');
+	this.enemy.scale.setTo(0.2,0.2);
+    this.enemy.anchor.setTo(0.5, 0.5);
+	this.enemy.name = index.toString();
+    game.physics.enable(this.enemy, Phaser.Physics.ARCADE);
+	this.enemy.body.immovable = true;
+	this.enemy.body.collideWorldBounds = true;
 };
-
-Enemy = Object.create(Phaser.Sprite.prototype);
-Enemy.constructor = Enemy;
 
 //Constructor of Level1 Phase
 var Level1 = 
@@ -32,7 +30,6 @@ var Level1 =
 		game.load.image('triangle', 'assets/images/triangle.png');
 		game.load.image('bullet', 'assets/images/bullet.png');
 		game.load.image('enemy', 'assets/images/enemy.png');
-		//temporary assets borrowed from phaser examples
 		game.load.spritesheet('explode', 'assets/images/explode.png', 128, 128);
  	},
 	create: function()
@@ -77,8 +74,7 @@ var Level1 =
 		sprite.scale.setTo(0.1,0.1);
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
 		
-		
-		game.add.existing(new Enemy(this.game, this.game.width/2, 0));
+		new Enemy(0,game,game.world.centerX,game.world.centerY);
 
 		//lives
 	    lives = 1;
@@ -278,12 +274,6 @@ var Level1 =
 	{
 		object[0].kill();
 		object[1].kill();
-	},
-	enemySpawn:
-	scaleX:function(string, fontsize)
-	{
-		x = string.length * fontsize;
-		return x;
 	},
 	fireBullet: function() {
 		if (game.time.now > bulletTime)

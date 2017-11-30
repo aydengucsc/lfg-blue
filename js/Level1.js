@@ -169,6 +169,7 @@ var Level1 =
 
 	    //RNG to see if victim drops something
 	    var i = game.rnd.integerInRange(0, 100);
+	    //100% drop rate to make testing easier
 	    if (true) this.enemyDrops(victim.body.x+50, victim.body.y+50);
 	},
 	dropCollected: function(player, drop) {

@@ -5,17 +5,17 @@ var bulletTime = 0;
 var bullet;
 var lives;
 
-// Enemy constructor
-Enemy = function(index, game, x, y) 
-{
-	enemy = game.add.sprite(x,y,'enemy');
-	enemy.scale.setTo(0.2,0.2);
-    enemy.anchor.setTo(0.5, 0.5);
-	enemy.name = index.toString();
-    game.physics.enable(enemy, Phaser.Physics.ARCADE);
-	enemy.body.immovable = true;
-	enemy.body.collideWorldBounds = true;
-};
+// // Enemy constructor
+// Enemy = function(index, game, x, y) 
+// {
+// 	enemy = game.add.sprite(x,y,'enemy');
+// 	enemy.scale.setTo(0.2,0.2);
+//     enemy.anchor.setTo(0.5, 0.5);
+// 	enemy.name = index.toString();
+//     game.physics.enable(enemy, Phaser.Physics.ARCADE);
+// 	enemy.body.immovable = true;
+// 	enemy.body.collideWorldBounds = true;
+// };
 
 //Constructor of Level1 Phase
 var Level1 = 
@@ -67,23 +67,29 @@ var Level1 =
 	        b.events.onOutOfBounds.add(this.resetBullet, this);
 	    }
 
+	    //makes the player
 		sprite = game.add.sprite(game.world.centerX, game.world.centerY * 1.8, 'triangle');
 		sprite.anchor.setTo(0.5, 0.5);
 		sprite.scale.setTo(0.1,0.1);
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
 		sprite.body.collideWorldBounds = true;
 
-		//FIX THIS
-		//Only the rightmost enemy is killable.
-		for(var i = -3; i<1; i++){
-		new Enemy(0,game,game.world.centerX+ 150*i ,game.world.centerY);
+		//makes enemies
+		enemies = game.add.group();
+		enemies.enableBody = true;
+		enemies.physicsBodyType = Phaser.Physics.ARCADE;
+		//make some test enemies to shoot, feel free to change
+		for(var i = 0; i<5; i++){
+			for(var k = -3; k<4; k++){
+				this.makeEnemy(game.world.centerX+150*k, game.world.centerY- 150*i);
+			}
+			
 		}
 		//lives
 	    lives = 1;
 	    lifeCounter = game.add.text(70, game.world.height - 75, 'X ' + lives, { font: '60px Arial', fill: '#fff', align: "right"});
 		lifeCount = game.add.sprite(0, game.world.height-70, 'triangle');
-	        lifeCount.scale.setTo(0.08,0.08);
-	        //count.alpha = 0.4;
+	    lifeCount.scale.setTo(0.08,0.08);
 
 	    //boom
 	    explosions = game.add.group();
@@ -109,7 +115,7 @@ var Level1 =
 	    if (cursors.down.isDown) sprite.body.velocity.y = speed;
 	    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) this.fireBullet();
 
-	    game.physics.arcade.overlap(bullets, enemy, this.collisionHandler, null, this);
+	    game.physics.arcade.overlap(bullets, enemies, this.collisionHandler, null, this);
 	},
 	
 	//Additional Functions
@@ -124,7 +130,7 @@ var Level1 =
 
     //explode
     var explosion = explosions.getFirstExists(false);
-    explosion.reset(enemy.body.x+50, enemy.body.y+50);
+    explosion.reset(victim.body.x+50, victim.body.y+50);
     explosion.play('explode', 30, false, true);
 	},
 	setupBoom: function(boom) 
@@ -291,6 +297,14 @@ var Level1 =
 	{
 		object[0].kill();
 		object[1].kill();
+	},
+	makeEnemy: function(x, y){
+			var e = enemies.create(x,y, 'enemy');
+			e.name = "enemy" + enemies.length;
+			e.scale.setTo(0.2,0.2);
+			e.anchor.setTo(0.5, 0.5);
+			e.body.immovable = true;
+			e.body.collideWorldBounds = true;
 	},
 	fireBullet: function() {
 		if (game.time.now > bulletTime)

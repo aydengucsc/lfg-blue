@@ -34,12 +34,6 @@ var Level1 =
 		test = 0;
 		background = game.add.sprite(0, 0, 'background');
 
-		
-		game.input.keyboard.addCallbacks(this, null, null, this.pressFunct);
-		//test text that increments per frame so we can test the pause menu.
-		//Feel free to remove when we actually have a game.
-
-		
 		//makes drops
 		drops = game.add.group();
 		drops.enableBody = true;
@@ -96,7 +90,7 @@ var Level1 =
 	    enemyBullets.enableBody = true;
 	    enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
 
-	    for (var i = 0; i < 1000; i++)
+	    for (var i = 0; i < 50; i++)
 	    { 
 	        var b = enemyBullets.create(0, 0, 'bullet');
 	        b.name = 'evilBullet' + i;
@@ -120,15 +114,19 @@ var Level1 =
 		lifeCount = game.add.sprite(0, game.world.height-70, 'triangle');
 	    lifeCount.scale.setTo(0.08,0.08);
 
+	    //inputs
 		cursors = game.input.keyboard.createCursorKeys();
-		game.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ]);
+		game.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ]);		
+		game.input.keyboard.addCallbacks(this, null, null, this.pressFunct);
 
 		this.createButton("Pause",game.world.centerX*1.65, 100, 300, 100, this.pauseMenu);
 		this.createButton("Dev Mode",game.world.centerX*1.65, 225, 300, 100, this.cheatFunct);
 
+		//UI
 		scoreString = 'Score: ';
 		scoreText = game.add.text(10,10, scoreString + score, {font: '40px Arial', fill:'#fff'});
-		testText = game.add.text(game.world.centerX-465,game.world.centerY-800,"Game up:" + test,{font:"50px Verdana", fill: "#fff"});
+		//testText = game.add.text(game.world.centerX-465,game.world.centerY-800,"Game up:" + test,{font:"50px Verdana", fill: "#fff"});
+
 		//make some test enemies to shoot, feel free to change
 		// for(var i = 0; i<60; i++){
 		// 	for(var k = -3; k<4; k++){
@@ -145,8 +143,8 @@ var Level1 =
 		if (game.time.now > firingTime) this.enemyShoot();
 		//UI stuff
 		scoreText.text = scoreString + score;
-		test++;
-		testText.text = "Level Counter: " + test;
+		//test++;
+		//testText.text = "Level Counter: " + test;
 		lifeCounter.text = "X " + lives;
 
 		//player movement
@@ -183,30 +181,25 @@ var Level1 =
             //this.explodeFunct(x,y);
             enemy.body.velocity.x = xspeed;
             enemy.body.velocity.y = yspeed;
-            spawnTime = game.time.now +50;
+            spawnTime = game.time.now +200;
         }	
 	},
 	enemyShoot: function() {
         enemyBullet = enemyBullets.getFirstExists(false);
 
-	    livingEnemies.length=0;
-
-	    enemies.forEachAlive(function(enemy){
-	        // put every living enemy in an array
-	        livingEnemies.push(enemy);
-	    });
-
-
-	    if (enemyBullet && livingEnemies.length > 0)
+		if (enemyBullet)
 	    {
-	        var random=game.rnd.integerInRange(0,livingEnemies.length-1);
 	        // randomly select one of them
-	        var shooter=livingEnemies[random];
+	        var shooter=enemies.getRandomExists();
 	        // And fire the bullet from this enemy
 	        enemyBullet.reset(shooter.body.x, shooter.body.y);
-
-	        game.physics.arcade.moveToObject(enemyBullet,sprite,120);
-	        firingTime = game.time.now + 100;
+	        enemyBullet.tint = 0xff0000;
+	        //rng aim offset
+	        var offsetx = game.rnd.integerInRange(-50, 50);
+	        var offsety = game.rnd.integerInRange(-50, 50);
+	        
+	        game.physics.arcade.moveToXY(enemyBullet,sprite.body.x + offsetx, sprite.body.y + offsety,120);
+	        firingTime = game.time.now + 400;
 	    }
 	},
 	setupBoom: function(boom) 
@@ -257,6 +250,8 @@ var Level1 =
 	    	case 3: 	shootRateMultiplier+=0.5; console.log("RATE UP: " + shootRateMultiplier); break;
 	    	case 4: 	score+=1000; console.log("SCORE UP: " + score); break;
 	    	case 5: 	lives+=1;	console.log("1-up! " + lives); break;
+	    	case 6: 	shotSpread+=2;	console.log("SPREAD UP " + shotSpread); break;
+	    	
 	    	default: 	console.log("I don't know what you just picked up"); break;
 	    }
 	},
@@ -268,7 +263,7 @@ var Level1 =
 	            drop.body.velocity.y = -200;
 	            drop.body.gravity.y = 300;
 	           	//if you have a new buff idea, make the range here bigger
-	            var i = game.rnd.integerInRange(1, 5)/10;
+	            var i = game.rnd.integerInRange(1, 6)/10;
 	            //console.log("i = "+ i);
 	            drop.tint = i*0xffffff;
 	        }
@@ -279,7 +274,7 @@ var Level1 =
     	enemy.kill();
 	},
 	enemyOffScreen: function(bar, enemy){
-		//console.log("reset "+ enemy.name);
+		console.log("reset "+ enemy.name);
 		enemy.kill();
 	},
 	killFunct: function(){

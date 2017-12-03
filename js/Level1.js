@@ -23,11 +23,14 @@ var Level1 =
 		shotSpeedMultiplier = 1;
 		moveSpeedMultiplier = 1;
 		shotSpread = 1;
+		iFrames = 0.5;
 		lives =5;
 		spawnTime = 0;
 		bulletTime = 0;
 		firingTime = 0;
-		bossBattle = false;
+		hurtTime = 0;
+		bossBattle = 0;
+		bossDelay = 0;
 		//gameplay-related numbers end
 
 		stateVar = "START";
@@ -89,13 +92,17 @@ var Level1 =
 	    }
 
 	    //makes boss
-	    boss = game.add.sprite(500, 400, 'boss');
+	    boss = game.add.sprite(0, 0, 'boss');
 	    boss.anchor.setTo(0.5, 0.5);
 	    boss.angle = 180;
-	    boss.exists = false;	
+	    boss.exists = false;
+	    boss.visible = false;	
 	    boss.scale.x = 0.6;
 	    boss.scale.y = 0.6;
 	    game.physics.enable(boss, Phaser.Physics.ARCADE);
+	    bossHealth = 1.00;
+		bossHPBar = game.add.sprite(-game.world.width, game.world.height-100, "loadbar");
+		game.physics.enable(bossHPBar, Phaser.Physics.ARCADE);
 
 		//makes ENEMY bullets
 	 	enemyBullets = game.add.group();
@@ -153,7 +160,6 @@ var Level1 =
 		//enemies stuff
 		if (game.time.now > spawnTime && !bossBattle) this.makeEnemy();
 		if (game.time.now > firingTime) this.enemyShoot();
-		if(!bossBattle && score > 0) this.spawnBoss();
 
 		//UI stuff
 		scoreText.text = scoreString + score;
@@ -161,8 +167,9 @@ var Level1 =
 		//testText.text = "Level Counter: " + test;
 		lifeCounter.text = "X " + lives;
 
-		//player movement
+		//player stuff
 		sprite.body.stop();
+		if (game.time.now > hurtTime) sprite.tint = 0xffffff;
 	    speed = 600 * moveSpeedMultiplier;
 	    if (cursors.left.isDown) sprite.body.velocity.x = -speed;
 	    if (cursors.right.isDown) sprite.body.velocity.x = speed;
@@ -171,7 +178,22 @@ var Level1 =
 	    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) this.fireBullet();
 
 	    //BOSS FIGHT
-	    if (boss.body.y >= game.world.centerY - 600) boss.body.stop();
+		if(!bossBattle && score > 5000) this.prepBoss();
+	    if (bossBattle == 1 && enemies.getFirstExists()) this.prepBoss2();
+	    if (bossBattle == 2) this.prepBoss3();
+	    if (boss.body.y >= game.world.centerY - 600 && bossBattle == 3){
+	    	bossDelay = game.time.now + 700;
+	    	boss.body.stop();
+	    	bossBattle = 3.5;
+	    }
+	    if (bossBattle == 3.5) this.prepBoss4();
+	    if (bossHPBar.body.x >= 0 && bossBattle == 4){
+   	 		bossDelay = game.time.now + 800;
+	    	bossHPBar.body.stop();
+	    	bossBattle = 4.5;
+	    }
+	    if (bossBattle == 4.5) this.prepBoss5();
+	    if (bossBattle == 5) bossHPBar.body.velocity.x = -1200;
 
 	    //collision tests
 	    game.physics.arcade.overlap(bullets, enemies, this.bulletHit, null, this);
@@ -200,7 +222,7 @@ var Level1 =
         }
 	},
 	enemyShoot: function() {
-        enemyBullet = enemyBullets.getFirstExists(false);
+        var enemyBullet = enemyBullets.getFirstExists(false);
 
 		if (enemyBullet)
 	    {
@@ -219,20 +241,94 @@ var Level1 =
 	        }
 	    }
 	},
-	spawnBoss: function() {
-		bossBattle = true;
+	//BOSS FIGHT
+	prepBoss: function() {
+		bossBattle = 1;
+		firingTime+=5000;
+		bulletTime+=99999999;
+		bullets.killAll();
 		enemyBullets.killAll();
-
-		while(enemies.getFirstExists(true)){
-			if(game.time.now > delay){
-				victim = enemies.getRandomExists();
+		drops.killAll();
+	    enemies.forEachAlive(function(enemy){enemy.body.stop();});
+		explodeDelay = 0;
+	},
+	prepBoss2: function() 
+	{	
+		if(victim = enemies.getRandomExists()){
+			if(game.time.now > explodeDelay){
 				this.explodeFunct(victim.x, victim.y);
 				victim.kill();
+				explodeDelay = game.time.now +150;
 			}
 		}
+		if(!enemies.getFirstExists()) bossBattle = 2;
+	},
+	prepBoss3: function() 
+	{	
+		bossBattle = 3;
 	    boss.reset(game.world.centerX, -boss.height);
 	    //game.physics.arcade.moveToXY(boss, game.world.centerX, game.world.centerY -400, 300);
-	    boss.body.velocity.y = 400;
+	    boss.body.velocity.y = 1000;
+	},
+	prepBoss4: function() 
+	{	
+		if(game.time.now > bossDelay){
+			redBar = game.add.sprite(-game.world.width-1100, game.world.height-100, "loadbar");
+			//bossHPBar = game.add.sprite(0, game.world.height-100, "loadbar");
+			bossHPBar.width = game.world.width;
+			redBar.width = game.world.width*1.5;
+			redBar.tint = 0xff0000
+			bossHPBar.anchor.setTo(0,0);
+			//game.physics.enable(bossHPBar, Phaser.Physics.ARCADE);
+			game.physics.enable(redBar, Phaser.Physics.ARCADE);
+			bossHPBar.body.velocity.x = 1400;
+			redBar.body.velocity.x = 1400;
+			bossBattle = 4;
+		}
+	},
+	prepBoss5: function() 
+	{	
+		if(game.time.now > bossDelay){
+	    	bossBattle = 5;
+	    	redBar.kill();
+	    	bossHPBar.tint = 0xff0000;
+	    	bossHPBar.body.collideWorldBounds = true;
+	    	//bossHPBar.body.velocity.x = -1200;
+	    	bulletTime = game.time.now;
+		}
+	},
+	prepBoss5: function() 
+	{	
+		if(game.time.now > bossDelay){
+	    	bossBattle = 5;
+	    	redBar.kill();
+	    	bossHPBar.tint = 0xff0000;
+	    	bossHPBar.body.collideWorldBounds = true;
+	    	//bossHPBar.body.velocity.x = -1200;
+	    	bulletTime = game.time.now;
+		}
+	},
+	bossEnd: function() 
+	{	
+		if(game.time.now > bossDelay){
+	    	bossBattle = 5;
+	    	redBar.kill();
+	    	bossHPBar.tint = 0xff0000;
+	    	bossHPBar.body.collideWorldBounds = true;
+	    	//bossHPBar.body.velocity.x = -1200;
+	    	bulletTime = game.time.now;
+		}
+	},
+
+	bossHurt: function(boss, shot) {
+		//kill bullet sprites
+	    shot.kill();
+	    bossHealth-=0.02;
+	    bossHPBar.width = game.world.width-game.world.width*(1-bossHealth);
+	    if (bossHealth <= 0){
+	    	this.bossEnd();
+	    }
+	    console.log("boss hurt, HP = " + bossHealth);
 	},
 	setupBoom: function(boom) 
 	{
@@ -283,6 +379,7 @@ var Level1 =
 	    	case 4: 	score+=1000; console.log("SCORE UP: " + score); break;
 	    	case 5: 	lives+=1;	console.log("1-up! " + lives); break;
 	    	case 6: 	shotSpread+=2;	console.log("SPREAD UP " + shotSpread); break;
+	    	case 7: 	iFrames+=1;	console.log("I-FRAMES UP "+ iFrames); break;
 	    	
 	    	default: 	console.log("I don't know what you just picked up"); break;
 	    }
@@ -295,7 +392,7 @@ var Level1 =
 	            drop.body.velocity.y = -200;
 	            drop.body.gravity.y = 300;
 	           	//if you have a new buff idea, make the range here bigger
-	            var i = game.rnd.integerInRange(1, 6)/10;
+	            var i = game.rnd.integerInRange(1, 7)/10;
 	            //console.log("i = "+ i);
 	            drop.tint = i*0xffffff;
 	        }
@@ -310,15 +407,19 @@ var Level1 =
 		enemy.kill();
 	},
 	killFunct: function(){
-	    if (lives>-1)
-	    {
-		    this.explodeFunct(sprite.body.x+15, sprite.body.y+15);
-		    lives--;
-	    }
-	    if (lives < 0){
-		    this.gameOver();
-		    sprite.visible = false;
-	    }
+		if(game.time.now > hurtTime){
+		    if (lives>-1)
+		    {
+			    this.explodeFunct(sprite.body.x+15, sprite.body.y+15);
+			    lives--;
+			    hurtTime = game.time.now + iFrames*100;
+			    sprite.tint = 0x0099ff;
+		    }
+		    if (lives < 0){
+			    this.gameOver();
+			    sprite.visible = false;
+		    }	
+		}
 	},
 	fireBullet: function() {
 		//machine gun *obsolete*
@@ -373,6 +474,8 @@ var Level1 =
 			this.removeButton(dieBtn);
 			this.removeButton(speedBtn);
 			this.removeButton(slowBtn);
+			this.removeButton(iframeBtn);
+			this.removeButton(lessiFrameBtn);
 			this.removeButton(shootFastBtn);
 			this.removeButton(ShootSlowBtn);
 			this.removeButton(spreadBtn);
@@ -401,6 +504,10 @@ var Level1 =
 						300, 100, function(){moveSpeedMultiplier += 1; console.log("moveSpeed UP: "+ moveSpeedMultiplier);});
 		slowBtn = this.createButton("Go slower",game.world.centerX-360,game.world.centerY+180, 
 						300, 100, function(){moveSpeedMultiplier -= 1; console.log("moveSpeed DOWN: "+ moveSpeedMultiplier);});
+		iframeBtn = this.createButton("More i-frames",game.world.centerX-360,game.world.centerY+330, 
+						300, 100, function(){iFrames += 5; console.log("iFrames UP: "+ iFrames);});
+		lessiFrameBtn = this.createButton("Less i-frames",game.world.centerX-360,game.world.centerY+480, 
+						300, 100, function(){iFrames -= 5; console.log("iFrames DOWN: "+ iFrames);});
 		shootFastBtn = this.createButton("Shoot faster",game.world.centerX,game.world.centerY+30, 
 						300, 100, function(){shootRateMultiplier += 0.5; console.log("shootRate UP: "+ shootRateMultiplier);});
 		ShootSlowBtn = this.createButton("Shoot slower",game.world.centerX,game.world.centerY+180, 
@@ -508,7 +615,7 @@ var Level1 =
 		//cheat: live + 5
 		if(char == 'l'){
 			lives+=5;
-		}
+		}		
 		/*It also captures the entire keyboard if you want to do something with that input
 		 *NOTE: Don't use this for game stuff like movement and actions, etc!
 		 *This will fire even if the game is paused.

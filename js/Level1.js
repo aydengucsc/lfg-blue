@@ -31,6 +31,7 @@ var Level1 =
 		hurtTime = 0;
 		bossBattle = 0;
 		bossDelay = 0;
+		bossKilled = false;
 		//gameplay-related numbers end
 
 		stateVar = "START";
@@ -178,11 +179,12 @@ var Level1 =
 	    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) this.fireBullet();
 
 	    //BOSS FIGHT
-		if(!bossBattle && score > 5000) this.prepBoss();
+		if(!bossBattle && score > 5000 && !bossKilled) this.prepBoss();
 	    if (bossBattle == 1 && enemies.getFirstExists()) this.prepBoss2();
 	    if (bossBattle == 2) this.prepBoss3();
 	    if (boss.body.y >= game.world.centerY - 600 && bossBattle == 3){
 	    	bossDelay = game.time.now + 700;
+	    	bossDelay = game.time.now + 0;
 	    	boss.body.stop();
 	    	bossBattle = 3.5;
 	    }
@@ -194,6 +196,9 @@ var Level1 =
 	    }
 	    if (bossBattle == 4.5) this.prepBoss5();
 	    if (bossBattle == 5) bossHPBar.body.velocity.x = -1200;
+	    if (bossBattle == "BOSS IS KILL") this.bossExplode();
+		if (bossBattle == "BOSS IS KILL" && bossExplodeCount >10) this.bossEnd();
+
 
 	    //collision tests
 	    game.physics.arcade.overlap(bullets, enemies, this.bulletHit, null, this);
@@ -267,19 +272,16 @@ var Level1 =
 	{	
 		bossBattle = 3;
 	    boss.reset(game.world.centerX, -boss.height);
-	    //game.physics.arcade.moveToXY(boss, game.world.centerX, game.world.centerY -400, 300);
 	    boss.body.velocity.y = 1000;
 	},
 	prepBoss4: function() 
 	{	
 		if(game.time.now > bossDelay){
 			redBar = game.add.sprite(-game.world.width-1100, game.world.height-100, "loadbar");
-			//bossHPBar = game.add.sprite(0, game.world.height-100, "loadbar");
 			bossHPBar.width = game.world.width;
 			redBar.width = game.world.width*1.5;
 			redBar.tint = 0xff0000
 			bossHPBar.anchor.setTo(0,0);
-			//game.physics.enable(bossHPBar, Phaser.Physics.ARCADE);
 			game.physics.enable(redBar, Phaser.Physics.ARCADE);
 			bossHPBar.body.velocity.x = 1400;
 			redBar.body.velocity.x = 1400;
@@ -293,42 +295,43 @@ var Level1 =
 	    	redBar.kill();
 	    	bossHPBar.tint = 0xff0000;
 	    	bossHPBar.body.collideWorldBounds = true;
-	    	//bossHPBar.body.velocity.x = -1200;
 	    	bulletTime = game.time.now;
 		}
 	},
-	prepBoss5: function() 
+	bossDeath: function() 
+	{	
+		bossHPBar.kill();
+		score+=9001;
+		bossBattle = "BOSS IS KILL";
+		bossKilled = true;
+		bossExplodeCount = 0;
+		// boss.kill();
+		// bossBattle= 0;
+	},
+	bossExplode: function() 
 	{	
 		if(game.time.now > bossDelay){
-	    	bossBattle = 5;
-	    	redBar.kill();
-	    	bossHPBar.tint = 0xff0000;
-	    	bossHPBar.body.collideWorldBounds = true;
-	    	//bossHPBar.body.velocity.x = -1200;
-	    	bulletTime = game.time.now;
+			var xoffset = game.rnd.integerInRange(-250, 250);
+			var yoffset = game.rnd.integerInRange(-250, 250);
+			this.explodeFunct(boss.body.x+xoffset, boss.body.y+yoffset);
+			bossDelay = game.time.now + 100;
+			bossExplodeCount++;
 		}
 	},
 	bossEnd: function() 
 	{	
-		if(game.time.now > bossDelay){
-	    	bossBattle = 5;
-	    	redBar.kill();
-	    	bossHPBar.tint = 0xff0000;
-	    	bossHPBar.body.collideWorldBounds = true;
-	    	//bossHPBar.body.velocity.x = -1200;
-	    	bulletTime = game.time.now;
-		}
+		boss.kill();
+		bossBattle= 0;
 	},
-
 	bossHurt: function(boss, shot) {
 		//kill bullet sprites
 	    shot.kill();
 	    bossHealth-=0.02;
 	    bossHPBar.width = game.world.width-game.world.width*(1-bossHealth);
 	    if (bossHealth <= 0){
-	    	this.bossEnd();
+	    	this.bossDeath();
 	    }
-	    console.log("boss hurt, HP = " + bossHealth);
+	    //console.log("boss hurt, HP = " + bossHealth);
 	},
 	setupBoom: function(boom) 
 	{

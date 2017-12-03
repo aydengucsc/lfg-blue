@@ -37,18 +37,20 @@ var Level1 =
 		game.load.image('drop', 'assets/images/doritos.png');
  	},
 	create: function()
-	{
+	{	
+		//Setup gameplay numbers here
 		shootRateMultiplier = 1;
 		shotSpeedMultiplier = 1;
 		moveSpeedMultiplier = 1;
+		lives =9001;
+		//gameplay-related numbers end
 
 		stateVar = "START";
 		score = 0;
 		test = 0;
-		background = this.game.add.sprite(0, 0, 'background');
-		//temporary? pause button
-		//it's not killed when we pause, just covered. You can still click it to unpause.
-		//Intentional. This makes testing easier
+		background = game.add.sprite(0, 0, 'background');
+
+
 		this.createButton("Pause",game.world.centerX*1.65, 100, 300, 100, this.pauseMenu);
 		this.createButton("Dev Mode",game.world.centerX*1.65, 225, 300, 100, this.cheatFunct);
 
@@ -71,7 +73,7 @@ var Level1 =
 	        d.exists = false;
 	        d.visible = false;
 	        d.checkWorldBounds = true;
-	        d.events.onOutOfBounds.add(this.resetDrop, this);
+	        d.events.onOutOfBounds.add(this.resetFunct, this);
 	    }
 		//makes bullets
 	 	bullets = game.add.group();
@@ -85,7 +87,7 @@ var Level1 =
 	        b.exists = false;
 	        b.visible = false;
 	        b.checkWorldBounds = true;
-	        b.events.onOutOfBounds.add(this.resetBullet, this);
+	        b.events.onOutOfBounds.add(this.resetFunct, this);
 	    }
 
 	    //makes the player
@@ -100,16 +102,30 @@ var Level1 =
 		enemies.enableBody = true;
 		enemies.physicsBodyType = Phaser.Physics.ARCADE;
 
+	    for (var i = 0; i < 500; i++)
+	    { 
+	        var e = enemies.create(0, 0, 'enemy');
+	        e.name = 'enemy' + i;
+    		e.scale.setTo(0.2,0.2);
+			e.anchor.setTo(0.5, 0.5);
+	        e.exists = false;
+	        e.visible = false;
+	    }
+
 		//make some test enemies to shoot, feel free to change
-		for(var i = 0; i<5; i++){
+		for(var i = 0; i<60; i++){
 			for(var k = -3; k<4; k++){
-				this.makeEnemy(game.world.centerX+150*k, game.world.centerY- 150*i);
+				//console.log("spam");
+				this.spawnEnemy(game.world.centerX+150*k, game.world.centerY- 150*i);
 			}
 			
 		}
+		//make a bar on the bottom of the screen to despawn offscreen enemies
+		screenBottomBar = game.add.sprite(0, game.world.height+100, "loadbar");
+		screenBottomBar.width = game.world.width;
+		game.physics.enable(screenBottomBar, Phaser.Physics.ARCADE);
 		
 		//lives
-	    lives = 1;
 	    lifeCounter = game.add.text(70, game.world.height - 75, 'X ' + lives, { font: '60px Arial', fill: '#fff', align: "right"});
 		lifeCount = game.add.sprite(0, game.world.height-70, 'triangle');
 	    lifeCount.scale.setTo(0.08,0.08);
@@ -141,19 +157,20 @@ var Level1 =
 	    game.physics.arcade.overlap(bullets, enemies, this.bulletHit, null, this);
 	    game.physics.arcade.overlap(drops, sprite, this.dropCollected, null, this);
 	    game.physics.arcade.overlap(sprite, enemies, this.shipCollision, null, this);
+	    game.physics.arcade.overlap(screenBottomBar, enemies, this.enemyOffScreen, null, this);
 	},
 	
 
-	//Additional Functions
-	makeEnemy: function(x, y){
-		var e = enemies.create(x,y, 'enemy');
-		e.name = "enemy" + enemies.length;
-		e.scale.setTo(0.2,0.2);
-		e.anchor.setTo(0.5, 0.5);
-		e.body.immovable = true;
-		e.body.collideWorldBounds = true;
+	// //Additional Functions
+	spawnEnemy: function(x, y) {
+        enemy = enemies.getFirstExists(false);
+        if (enemy)
+        {
+            enemy.reset(x, y);
+            //testing enemy movement, for now they just fly straight down
+            enemy.body.velocity.y = 1200;
+        }	
 	},
-	
 	setupBoom: function(boom) 
 	{
 		boom.anchor.x = 0.3;
@@ -170,9 +187,7 @@ var Level1 =
 	    scoreText.text = scoreString + score;
 
 	    //explode
-	    var explosion = explosions.getFirstExists(false);
-	    explosion.reset(victim.body.x+50, victim.body.y+50);
-	    explosion.play('explode', 30, false, true);
+	    this.explodeFunct(victim.body.x+50, victim.body.y+50);
 
 	    //RNG to see if victim drops something
 	    var i = game.rnd.integerInRange(0, 100);
@@ -189,40 +204,46 @@ var Level1 =
 	    score += 1000;
 	    scoreText.text = scoreString + score;
 
-	    //explode
-	    var explosion = explosions.getFirstExists(false);
-	    explosion.reset(player.body.x+50, player.body.y+50);
-	    explosion.play('explode', 30, false, true);
+	    //explode because why not
+	    this.explodeFunct(player.body.x, player.body.y);
 
 	    //applies buff
 	    //if you come up with more buff ideas, simply add another case and make the range bigger in enemyDrops()
 	    switch(dropType){
-	    	case 1: moveSpeedMultiplier+=0.5; console.log("MOVE UP: " + moveSpeedMultiplier); break;
-	    	case 2: shotSpeedMultiplier+=0.5; console.log("SHOT SPEED UP: " + shotSpeedMultiplier); break;
-	    	case 3: shootRateMultiplier+=0.5; console.log("RATE UP: " + shootRateMultiplier); break;
-	    	case 4: score+=1337; console.log("SCORE UP: " + score); break;
-	    	default:break;
+	    	case 1: 	moveSpeedMultiplier+=0.5; console.log("MOVE UP: " + moveSpeedMultiplier); break;
+	    	case 2: 	shotSpeedMultiplier+=0.5; console.log("SHOT SPEED UP: " + shotSpeedMultiplier); break;
+	    	case 3: 	shootRateMultiplier+=0.5; console.log("RATE UP: " + shootRateMultiplier); break;
+	    	case 4: 	score+=1337; console.log("SCORE UP: " + score); break;
+	    	case 5: 	lives+=1;	console.log("1-up! " + lives); break;
+	    	default: 	console.log("I don't know what you just picked up"); break;
 	    }
 	},
 	enemyDrops: function(x, y){
 		drop = drops.getFirstExists(false);
        	if (drop)
 	        {
-	            drop.reset(x, y);
+	            drop.reset(x-30, y);
 	            drop.body.velocity.y = -200;
 	            drop.body.gravity.y = 300;
 	           	//if you have a new buff idea, make the range here bigger
-	            var i = game.rnd.integerInRange(1, 4)/10;
+	            var i = game.rnd.integerInRange(1, 5)/10;
 	            //console.log("i = "+ i);
 	            drop.tint = i*0xffffff;
 	        }
 	},
+	//ship collision test
+	shipCollision: function(player, enemy) {
+    	this.killFunct();
+    	enemy.kill();
+	},
+	enemyOffScreen: function(bar, enemy){
+		//console.log("reset "+ enemy.name);
+		enemy.kill();
+	},
 	killFunct: function(){
 	    if (lives>-1)
 	    {
-			var explosion = explosions.getFirstExists(false);
-		    explosion.reset(sprite.body.x, sprite.body.y);
-		    explosion.play('explode', 30, false, true);
+		    this.explodeFunct(sprite.body.x+15, sprite.body.y+15);
 		    lives--;
 	    }
 	    if (lives < 0){
@@ -243,12 +264,16 @@ var Level1 =
 	        }
 	    }
 	},
-	resetBullet : function(bullet) {
-		bullet.kill();
+	resetFunct: function(object){
+		//console.log(object.name+" just reset");
+		object.kill();
 	},
-	resetDrop : function(drop) {
-		drop.kill();
+	explodeFunct: function(x, y){
+		var explosion = explosions.getFirstExists(false);
+	    explosion.reset(x, y);
+	    explosion.play('explode', 30, false, true);
 	},
+
 
 	cheatFunct: function(){
 		stateVar = "CHEAT";
@@ -397,15 +422,6 @@ var Level1 =
 		 *This will fire even if the game is paused.
 		 *console.log("You pressed: ", char);
 		 */
-	},
-
-	//ship collision test
-	shipCollision: function(player, enemy) {
-    	var explosion = explosions.getFirstExists(false);
-    	explosion.reset(sprite.body.x, sprite.body.y);
-    	explosion.alpha = 0.7;
-    	explosion.play('explode', 30, false, true);
-    	enemy.kill();
 	},
 
 	scaleX:function(string, fontsize)

@@ -1,25 +1,3 @@
-var sprite;
-var bullets;
-var cursors;
-var bulletTime = 0;
-var spawnTime = 0;
-var bullet;
-var lives;
-
-
-// // Enemy constructor
-// Enemy = function(index, game, x, y) 
-// {
-// 	enemy = game.add.sprite(x,y,'enemy');
-// 	enemy.scale.setTo(0.2,0.2);
-//     enemy.anchor.setTo(0.5, 0.5);
-// 	enemy.name = index.toString();
-//     game.physics.enable(enemy, Phaser.Physics.ARCADE);
-// 	enemy.body.immovable = true;
-// 	enemy.body.collideWorldBounds = true;
-// };
-
-//Constructor of Level1 Phase
 var Level1 = 
 {
 	
@@ -45,6 +23,10 @@ var Level1 =
 		moveSpeedMultiplier = 1;
 		shotSpread = 1;
 		lives =5;
+		spawnTime = 0;
+		bulletTime = 0;
+		firingTime = 0;
+		livingEnemies = [];
 		//gameplay-related numbers end
 
 		stateVar = "START";
@@ -109,7 +91,20 @@ var Level1 =
 	        e.exists = false;
 	        e.visible = false;
 	    }
+		//makes ENEMY bullets
+	 	enemyBullets = game.add.group();
+	    enemyBullets.enableBody = true;
+	    enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
 
+	    for (var i = 0; i < 1000; i++)
+	    { 
+	        var b = enemyBullets.create(0, 0, 'bullet');
+	        b.name = 'evilBullet' + i;
+	        b.exists = false;
+	        b.visible = false;
+	        b.checkWorldBounds = true;
+	        b.events.onOutOfBounds.add(this.resetFunct, this);
+	    }
 	    //make explosions
 	    explosions = game.add.group();
 	    explosions.createMultiple(200, 'explode');
@@ -145,8 +140,9 @@ var Level1 =
 	},
 	update: function()
 	{	
-		//Spawns more enemies
+		//enemies stuff
 		if (game.time.now > spawnTime) this.makeEnemy();
+		if (game.time.now > firingTime) this.enemyShoot();
 		//UI stuff
 		scoreText.text = scoreString + score;
 		test++;
@@ -165,6 +161,7 @@ var Level1 =
 
 	    //collision tests
 	    game.physics.arcade.overlap(bullets, enemies, this.bulletHit, null, this);
+	    game.physics.arcade.overlap(sprite, enemyBullets, this.enemyHitsPlayer, null, this);
 	    game.physics.arcade.overlap(drops, sprite, this.dropCollected, null, this);
 	    game.physics.arcade.overlap(sprite, enemies, this.shipCollision, null, this);
 	    game.physics.arcade.overlap(screenBottomBar, enemies, this.enemyOffScreen, null, this);
@@ -189,11 +186,39 @@ var Level1 =
             spawnTime = game.time.now +50;
         }	
 	},
+	enemyShoot: function() {
+        enemyBullet = enemyBullets.getFirstExists(false);
+
+	    livingEnemies.length=0;
+
+	    enemies.forEachAlive(function(enemy){
+	        // put every living enemy in an array
+	        livingEnemies.push(enemy);
+	    });
+
+
+	    if (enemyBullet && livingEnemies.length > 0)
+	    {
+	        var random=game.rnd.integerInRange(0,livingEnemies.length-1);
+	        // randomly select one of them
+	        var shooter=livingEnemies[random];
+	        // And fire the bullet from this enemy
+	        enemyBullet.reset(shooter.body.x, shooter.body.y);
+
+	        game.physics.arcade.moveToObject(enemyBullet,sprite,120);
+	        firingTime = game.time.now + 100;
+	    }
+	},
 	setupBoom: function(boom) 
 	{
 		boom.anchor.x = 0.3;
 		boom.anchor.y = 0.3;
 		boom.animations.add('explode');
+	},
+	enemyHitsPlayer: function(player, shot) {
+		//kill bullet sprites
+	    shot.kill();
+	    this.killFunct();
 	},
 	bulletHit: function(shot, victim) {
 		//kill both sprites
@@ -221,7 +246,8 @@ var Level1 =
 	    scoreText.text = scoreString + score;
 
 	    //explode because why not
-	    this.explodeFunct(player.body.x, player.body.y);
+	    //NVM EXPLODING MAKES THE GAME REALLY HARD
+	    //this.explodeFunct(player.body.x, player.body.y);
 
 	    //applies buff
 	    //if you come up with more buff ideas, simply add another case and make the range bigger in enemyDrops()

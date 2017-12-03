@@ -324,13 +324,15 @@ var Level1 =
 		bossBattle= 0;
 	},
 	bossHurt: function(boss, shot) {
-		//kill bullet sprites
-	    shot.kill();
-	    bossHealth-=0.02;
-	    bossHPBar.width = game.world.width-game.world.width*(1-bossHealth);
-	    if (bossHealth <= 0){
-	    	this.bossDeath();
-	    }
+		if(bossBattle == 5){
+			//kill bullet sprites
+		    shot.kill();
+		    bossHealth-=0.02;
+		    bossHPBar.width = game.world.width-game.world.width*(1-bossHealth);
+		    if (bossHealth <= 0){
+		    	this.bossDeath();
+		    }
+	   	}
 	    //console.log("boss hurt, HP = " + bossHealth);
 	},
 	setupBoom: function(boom) 

@@ -10,6 +10,7 @@ var Level1 =
 		game.load.image('triangle', 'assets/images/triangle.png');
 		game.load.image('bullet', 'assets/images/bullet.png');
 		game.load.image('enemy', 'assets/images/enemy.png');
+		game.load.image('boss', 'assets/images/boss.png');
 		game.load.spritesheet('explode', 'assets/images/explode.png', 128, 128);
 
 		//placeholder image for enemy drops
@@ -26,7 +27,7 @@ var Level1 =
 		spawnTime = 0;
 		bulletTime = 0;
 		firingTime = 0;
-		livingEnemies = [];
+		bossBattle = false;
 		//gameplay-related numbers end
 
 		stateVar = "START";
@@ -47,6 +48,7 @@ var Level1 =
 	        d.visible = false;
 	        d.checkWorldBounds = true;
 	        d.events.onOutOfBounds.add(this.resetFunct, this);
+	        d.body.maxVelocity.setTo(0, 600);
 	    }
 
 		//makes bullets
@@ -85,6 +87,16 @@ var Level1 =
 	        e.exists = false;
 	        e.visible = false;
 	    }
+
+	    //makes boss
+	    boss = game.add.sprite(500, 400, 'boss');
+	    boss.anchor.setTo(0.5, 0.5);
+	    boss.angle = 180;
+	    boss.exists = false;	
+	    boss.scale.x = 0.6;
+	    boss.scale.y = 0.6;
+	    game.physics.enable(boss, Phaser.Physics.ARCADE);
+
 		//makes ENEMY bullets
 	 	enemyBullets = game.add.group();
 	    enemyBullets.enableBody = true;
@@ -139,8 +151,10 @@ var Level1 =
 	update: function()
 	{	
 		//enemies stuff
-		if (game.time.now > spawnTime) this.makeEnemy();
+		if (game.time.now > spawnTime && !bossBattle) this.makeEnemy();
 		if (game.time.now > firingTime) this.enemyShoot();
+		if(!bossBattle && score > 0) this.spawnBoss();
+
 		//UI stuff
 		scoreText.text = scoreString + score;
 		//test++;
@@ -148,8 +162,7 @@ var Level1 =
 		lifeCounter.text = "X " + lives;
 
 		//player movement
-		sprite.body.velocity.x = 0;
-	    sprite.body.velocity.y = 0;
+		sprite.body.stop();
 	    speed = 600 * moveSpeedMultiplier;
 	    if (cursors.left.isDown) sprite.body.velocity.x = -speed;
 	    if (cursors.right.isDown) sprite.body.velocity.x = speed;
@@ -157,9 +170,13 @@ var Level1 =
 	    if (cursors.down.isDown) sprite.body.velocity.y = speed;
 	    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) this.fireBullet();
 
+	    //BOSS FIGHT
+	    if (boss.body.y >= game.world.centerY - 600) boss.body.stop();
+
 	    //collision tests
 	    game.physics.arcade.overlap(bullets, enemies, this.bulletHit, null, this);
 	    game.physics.arcade.overlap(sprite, enemyBullets, this.enemyHitsPlayer, null, this);
+	    game.physics.arcade.overlap(bullets, boss, this.bossHurt, null, this);
 	    game.physics.arcade.overlap(drops, sprite, this.dropCollected, null, this);
 	    game.physics.arcade.overlap(sprite, enemies, this.shipCollision, null, this);
 	    game.physics.arcade.overlap(screenBottomBar, enemies, this.enemyOffScreen, null, this);
@@ -170,7 +187,6 @@ var Level1 =
 		var x = game.rnd.integerInRange(0, game.world.width);
 		var xspeed = game.rnd.integerInRange(-100, 100);
 		var yspeed = game.rnd.integerInRange(600, 1200);
-		//this.explodeFunct(x,y);
 		this.spawnEnemy(x, -10, xspeed, yspeed);
 	},
 	spawnEnemy: function(x, y, xspeed, yspeed) {
@@ -178,29 +194,45 @@ var Level1 =
         if (enemy)
         {
             enemy.reset(x, y);
-            //this.explodeFunct(x,y);
             enemy.body.velocity.x = xspeed;
             enemy.body.velocity.y = yspeed;
             spawnTime = game.time.now +200;
-        }	
+        }
 	},
 	enemyShoot: function() {
         enemyBullet = enemyBullets.getFirstExists(false);
 
 		if (enemyBullet)
 	    {
-	        // randomly select one of them
+	        // randomly select one of the enemies on screen
 	        var shooter=enemies.getRandomExists();
-	        // And fire the bullet from this enemy
-	        enemyBullet.reset(shooter.body.x, shooter.body.y);
-	        enemyBullet.tint = 0xff0000;
-	        //rng aim offset
-	        var offsetx = game.rnd.integerInRange(-50, 50);
-	        var offsety = game.rnd.integerInRange(-50, 50);
-	        
-	        game.physics.arcade.moveToXY(enemyBullet,sprite.body.x + offsetx, sprite.body.y + offsety,120);
-	        firingTime = game.time.now + 400;
+	        //if shoooter is killed before bullet was shot, nothing happens
+	        if(shooter){ 
+		        enemyBullet.reset(shooter.body.x, shooter.body.y);
+		        enemyBullet.tint = 0xff0000;
+		        //rng aim offset
+		        var offsetx = game.rnd.integerInRange(-50, 50);
+		        var offsety = game.rnd.integerInRange(-50, 50);
+		        
+		        game.physics.arcade.moveToXY(enemyBullet,sprite.body.x + offsetx, sprite.body.y + offsety,120);
+		        firingTime = game.time.now + 400;
+	        }
 	    }
+	},
+	spawnBoss: function() {
+		bossBattle = true;
+		enemyBullets.killAll();
+
+		while(enemies.getFirstExists(true)){
+			if(game.time.now > delay){
+				victim = enemies.getRandomExists();
+				this.explodeFunct(victim.x, victim.y);
+				victim.kill();
+			}
+		}
+	    boss.reset(game.world.centerX, -boss.height);
+	    //game.physics.arcade.moveToXY(boss, game.world.centerX, game.world.centerY -400, 300);
+	    boss.body.velocity.y = 400;
 	},
 	setupBoom: function(boom) 
 	{
@@ -274,7 +306,7 @@ var Level1 =
     	enemy.kill();
 	},
 	enemyOffScreen: function(bar, enemy){
-		console.log("reset "+ enemy.name);
+		//console.log("reset "+ enemy.name);
 		enemy.kill();
 	},
 	killFunct: function(){

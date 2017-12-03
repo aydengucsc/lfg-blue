@@ -43,6 +43,7 @@ var Level1 =
 		shootRateMultiplier = 1;
 		shotSpeedMultiplier = 1;
 		moveSpeedMultiplier = 1;
+		shotSpread = 1;
 		lives =5;
 		//gameplay-related numbers end
 
@@ -51,16 +52,11 @@ var Level1 =
 		test = 0;
 		background = game.add.sprite(0, 0, 'background');
 
-
-		this.createButton("Pause",game.world.centerX*1.65, 100, 300, 100, this.pauseMenu);
-		this.createButton("Dev Mode",game.world.centerX*1.65, 225, 300, 100, this.cheatFunct);
-
-		scoreString = 'Score: ';
-		scoreText = game.add.text(10,10, scoreString + score, {font: '40px Arial', fill:'#fff'});
+		
 		game.input.keyboard.addCallbacks(this, null, null, this.pressFunct);
 		//test text that increments per frame so we can test the pause menu.
 		//Feel free to remove when we actually have a game.
-		testText = game.add.text(game.world.centerX-465,game.world.centerY-800,"Game up:" + test,{font:"50px Verdana", fill: "#fff"});
+
 		
 		//makes drops
 		drops = game.add.group();
@@ -82,7 +78,7 @@ var Level1 =
 	    bullets.enableBody = true;
 	    bullets.physicsBodyType = Phaser.Physics.ARCADE;
 
-	    for (var i = 0; i < 200; i++)
+	    for (var i = 0; i < 1000; i++)
 	    { 
 	        var b = bullets.create(0, 0, 'bullet');
 	        b.name = 'bullet' + i;
@@ -132,6 +128,12 @@ var Level1 =
 		cursors = game.input.keyboard.createCursorKeys();
 		game.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ]);
 
+		this.createButton("Pause",game.world.centerX*1.65, 100, 300, 100, this.pauseMenu);
+		this.createButton("Dev Mode",game.world.centerX*1.65, 225, 300, 100, this.cheatFunct);
+
+		scoreString = 'Score: ';
+		scoreText = game.add.text(10,10, scoreString + score, {font: '40px Arial', fill:'#fff'});
+		testText = game.add.text(game.world.centerX-465,game.world.centerY-800,"Game up:" + test,{font:"50px Verdana", fill: "#fff"});
 		//make some test enemies to shoot, feel free to change
 		// for(var i = 0; i<60; i++){
 		// 	for(var k = -3; k<4; k++){
@@ -154,7 +156,7 @@ var Level1 =
 		//player movement
 		sprite.body.velocity.x = 0;
 	    sprite.body.velocity.y = 0;
-	    speed = 500 * moveSpeedMultiplier;
+	    speed = 600 * moveSpeedMultiplier;
 	    if (cursors.left.isDown) sprite.body.velocity.x = -speed;
 	    if (cursors.right.isDown) sprite.body.velocity.x = speed;
 	    if (cursors.up.isDown) sprite.body.velocity.y = -speed;
@@ -171,19 +173,19 @@ var Level1 =
 
 	makeEnemy: function() {
 		var x = game.rnd.integerInRange(0, game.world.width);
-		var y = game.rnd.integerInRange(0, 300);
-		var speed = game.rnd.integerInRange(600, 1200);
-		this.explodeFunct(x,y);
-		this.spawnEnemy(x, y, speed);
+		var xspeed = game.rnd.integerInRange(-100, 100);
+		var yspeed = game.rnd.integerInRange(600, 1200);
+		//this.explodeFunct(x,y);
+		this.spawnEnemy(x, -10, xspeed, yspeed);
 	},
-	spawnEnemy: function(x, y, speed) {
+	spawnEnemy: function(x, y, xspeed, yspeed) {
         enemy = enemies.getFirstExists(false);
         if (enemy)
         {
             enemy.reset(x, y);
             //this.explodeFunct(x,y);
-            //testing enemy movement, for now they just fly straight down
-            enemy.body.velocity.y = speed;
+            enemy.body.velocity.x = xspeed;
+            enemy.body.velocity.y = yspeed;
             spawnTime = game.time.now +50;
         }	
 	},
@@ -216,7 +218,6 @@ var Level1 =
 	    drop.kill();
 
 	    //Increase the score
-	    score += 1000;
 	    scoreText.text = scoreString + score;
 
 	    //explode because why not
@@ -228,7 +229,7 @@ var Level1 =
 	    	case 1: 	moveSpeedMultiplier+=0.5; console.log("MOVE UP: " + moveSpeedMultiplier); break;
 	    	case 2: 	shotSpeedMultiplier+=0.5; console.log("SHOT SPEED UP: " + shotSpeedMultiplier); break;
 	    	case 3: 	shootRateMultiplier+=0.5; console.log("RATE UP: " + shootRateMultiplier); break;
-	    	case 4: 	score+=1337; console.log("SCORE UP: " + score); break;
+	    	case 4: 	score+=1000; console.log("SCORE UP: " + score); break;
 	    	case 5: 	lives+=1;	console.log("1-up! " + lives); break;
 	    	default: 	console.log("I don't know what you just picked up"); break;
 	    }
@@ -267,17 +268,35 @@ var Level1 =
 	    }
 	},
 	fireBullet: function() {
-		if (game.time.now > bulletTime)
-	    {
-	        bullet = bullets.getFirstExists(false);
-	        shootDelay = 50 / shootRateMultiplier;
-	        if (bullet)
-	        {
-	            bullet.reset(sprite.x-4, sprite.y-60);
-	            bullet.body.velocity.y = -1000;
-	            bulletTime = game.time.now +shootDelay;
-	        }
-	    }
+		//machine gun *obsolete*
+		// if (game.time.now > bulletTime)
+	 //    {
+	 //        bullet = bullets.getFirstExists(false);
+	 //        shootDelay = 50 / shootRateMultiplier;
+	 //        if (bullet)
+	 //        {
+	 //            bullet.reset(sprite.x-4, sprite.y-60);
+	 //            bullet.body.velocity.y = -1000;
+	 //            bulletTime = game.time.now +shootDelay;
+	 //        }
+	 //    }
+	 //shotgun  with spread of 1 behaves the same as machinegun
+	    //shotSpread = 1;
+    	if (game.time.now > bulletTime) {
+    		shootDelay = 150 / shootRateMultiplier;
+            for (var i = 0; i < shotSpread; i++) {
+                var bullet = bullets.getFirstExists(false);
+                if (bullet) {
+                    bullet.reset(sprite.x-4, sprite.y-60);
+                    var spreadAngle = 90/shotSpread;
+                    var k = Math.floor(shotSpread/2);
+                    var angle = k*spreadAngle - i*spreadAngle;
+                    game.physics.arcade.velocityFromAngle(angle-90, 300+40*shotSpread, bullet.body.velocity);
+                    bullet.body.velocity.y = -1000;
+                }
+            }
+        	bulletTime = game.time.now + shootDelay;
+        }
 	},
 	resetFunct: function(object){
 		//console.log(object.name+" just reset");
@@ -286,6 +305,8 @@ var Level1 =
 	explodeFunct: function(x, y){
 		var explosion = explosions.getFirstExists(false);
 	    explosion.reset(x, y);
+	    explosion.scale.setTo(1.4, 1.4);
+	    explosion.alpha = 0.5;
 	    explosion.play('explode', 30, false, true);
 	},
 
@@ -300,9 +321,9 @@ var Level1 =
 			this.removeButton(speedBtn);
 			this.removeButton(slowBtn);
 			this.removeButton(shootFastBtn);
-			this.removeButton(fasterBtn);
-			this.removeButton(fastererBtn);
-			this.removeButton(fasterestBtn);
+			this.removeButton(ShootSlowBtn);
+			this.removeButton(spreadBtn);
+			this.removeButton(lessSpreadBtn);
 			this.removeButton(scoreBtn);
 			this.removeButton(endGameBtn);
 			this.pauseFunct();
@@ -319,22 +340,22 @@ var Level1 =
 						 300, 100, function(){lives+=5;});
 		dieBtn = this.createButton("Lose lives",game.world.centerX+360,game.world.centerY+180, 
 						300, 100, function(){lives-=5;});
-		endGameBtn = this.createButton("Set lives to 0",game.world.centerX+360,game.world.centerY+480, 
+		endGameBtn = this.createButton("Set lives to 0",game.world.centerX+360,game.world.centerY+330, 
 						300, 100, function(){lives=0;});
-		scoreBtn = this.createButton("Increase score",game.world.centerX+360,game.world.centerY+330, 
-						300, 100, function(){score+= 12345;});
-		speedBtn = this.createButton("Go fast",game.world.centerX-360,game.world.centerY+30, 
-						300, 100, function(){moveSpeedMultiplier = 2;});
-		slowBtn = this.createButton("Go slow",game.world.centerX-360,game.world.centerY+180, 
-						300, 100, function(){moveSpeedMultiplier = 0.5;});
-		shootFastBtn = this.createButton("Shoot fast",game.world.centerX,game.world.centerY+30, 
-						300, 100, function(){shootSpeedMultiplier = 1.5;});
-		fasterBtn = this.createButton("Shoot faster",game.world.centerX,game.world.centerY+180, 
-						300, 100, function(){shootSpeedMultiplier = 2.5;});
-		fastererBtn = this.createButton("Shoot fasterer",game.world.centerX,game.world.centerY+330, 
-						300, 100, function(){shootSpeedMultiplier = 6;});
-		fasterestBtn = this.createButton("Shoot fasterest",game.world.centerX,game.world.centerY+480, 
-						300, 100, function(){shootSpeedMultiplier = -500;});
+		scoreBtn = this.createButton("Increase score",game.world.centerX+360,game.world.centerY+480, 
+						300, 100, function(){score+= 25000;});
+		speedBtn = this.createButton("Go faster",game.world.centerX-360,game.world.centerY+30, 
+						300, 100, function(){moveSpeedMultiplier += 1; console.log("moveSpeed UP: "+ moveSpeedMultiplier);});
+		slowBtn = this.createButton("Go slower",game.world.centerX-360,game.world.centerY+180, 
+						300, 100, function(){moveSpeedMultiplier -= 1; console.log("moveSpeed DOWN: "+ moveSpeedMultiplier);});
+		shootFastBtn = this.createButton("Shoot faster",game.world.centerX,game.world.centerY+30, 
+						300, 100, function(){shootRateMultiplier += 0.5; console.log("shootRate UP: "+ shootRateMultiplier);});
+		ShootSlowBtn = this.createButton("Shoot slower",game.world.centerX,game.world.centerY+180, 
+						300, 100, function(){shootRateMultiplier -= 0.25; console.log("shootRate DOWN: "+ shootRateMultiplier);});
+		spreadBtn = this.createButton("shotSpread++",game.world.centerX,game.world.centerY+330, 
+						300, 100, function(){shotSpread += 2; console.log("shotSpread UP: "+ shotSpread);});
+		lessSpreadBtn = this.createButton("shotSpread--",game.world.centerX,game.world.centerY+480, 
+						300, 100, function(){shotSpread -= 2; console.log("shotSpread DOWN: "+ shotSpread);});
 		}
 	},
 

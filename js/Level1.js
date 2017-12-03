@@ -5,6 +5,7 @@ var bulletTime = 0;
 var bullet;
 var lives;
 
+
 // // Enemy constructor
 // Enemy = function(index, game, x, y) 
 // {
@@ -98,6 +99,7 @@ var Level1 =
 		enemies = game.add.group();
 		enemies.enableBody = true;
 		enemies.physicsBodyType = Phaser.Physics.ARCADE;
+
 		//make some test enemies to shoot, feel free to change
 		for(var i = 0; i<5; i++){
 			for(var k = -3; k<4; k++){
@@ -105,6 +107,7 @@ var Level1 =
 			}
 			
 		}
+		
 		//lives
 	    lives = 1;
 	    lifeCounter = game.add.text(70, game.world.height - 75, 'X ' + lives, { font: '60px Arial', fill: '#fff', align: "right"});
@@ -137,7 +140,10 @@ var Level1 =
 
 	    game.physics.arcade.overlap(bullets, enemies, this.bulletHit, null, this);
 	    game.physics.arcade.overlap(drops, sprite, this.dropCollected, null, this);
+	    game.physics.arcade.overlap(sprite, enemies, this.shipCollision, null, this);
 	},
+	
+
 	//Additional Functions
 	makeEnemy: function(x, y){
 		var e = enemies.create(x,y, 'enemy');
@@ -147,6 +153,7 @@ var Level1 =
 		e.body.immovable = true;
 		e.body.collideWorldBounds = true;
 	},
+	
 	setupBoom: function(boom) 
 	{
 		boom.anchor.x = 0.3;
@@ -242,6 +249,7 @@ var Level1 =
 	resetDrop : function(drop) {
 		drop.kill();
 	},
+
 	cheatFunct: function(){
 		stateVar = "CHEAT";
 		//if game's paused, clean up menu and resume
@@ -286,6 +294,7 @@ var Level1 =
 						300, 100, function(){shootSpeedMultiplier = -500;});
 		}
 	},
+
 	//if game's already paused/over, don't unpause it cause you lost
 	gameOver: function(){
 		stateVar = "END";
@@ -304,6 +313,7 @@ var Level1 =
 						 100, function(){game.state.start('MainMenu'); game.paused = false;});
 		}
 	},
+
 	//if paused, remove buttons and pause screen
 	pauseMenu: function(){
 		stateVar = "PAUSE";
@@ -388,6 +398,16 @@ var Level1 =
 		 *console.log("You pressed: ", char);
 		 */
 	},
+
+	//ship collision test
+	shipCollision: function(player, enemy) {
+    	var explosion = explosions.getFirstExists(false);
+    	explosion.reset(sprite.body.x, sprite.body.y);
+    	explosion.alpha = 0.7;
+    	explosion.play('explode', 30, false, true);
+    	enemy.kill();
+	},
+
 	scaleX:function(string, fontsize)
 	{
 		x = string.length * fontsize;

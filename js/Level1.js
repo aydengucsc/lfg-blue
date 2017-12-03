@@ -2,6 +2,7 @@ var sprite;
 var bullets;
 var cursors;
 var bulletTime = 0;
+var spawnTime = 0;
 var bullet;
 var lives;
 
@@ -42,7 +43,7 @@ var Level1 =
 		shootRateMultiplier = 1;
 		shotSpeedMultiplier = 1;
 		moveSpeedMultiplier = 1;
-		lives =9001;
+		lives =5;
 		//gameplay-related numbers end
 
 		stateVar = "START";
@@ -75,6 +76,7 @@ var Level1 =
 	        d.checkWorldBounds = true;
 	        d.events.onOutOfBounds.add(this.resetFunct, this);
 	    }
+
 		//makes bullets
 	 	bullets = game.add.group();
 	    bullets.enableBody = true;
@@ -102,7 +104,7 @@ var Level1 =
 		enemies.enableBody = true;
 		enemies.physicsBodyType = Phaser.Physics.ARCADE;
 
-	    for (var i = 0; i < 500; i++)
+	    for (var i = 0; i < 40; i++)
 	    { 
 	        var e = enemies.create(0, 0, 'enemy');
 	        e.name = 'enemy' + i;
@@ -112,14 +114,11 @@ var Level1 =
 	        e.visible = false;
 	    }
 
-		//make some test enemies to shoot, feel free to change
-		for(var i = 0; i<60; i++){
-			for(var k = -3; k<4; k++){
-				//console.log("spam");
-				this.spawnEnemy(game.world.centerX+150*k, game.world.centerY- 150*i);
-			}
-			
-		}
+	    //make explosions
+	    explosions = game.add.group();
+	    explosions.createMultiple(200, 'explode');
+	    explosions.forEach(this.setupBoom);
+
 		//make a bar on the bottom of the screen to despawn offscreen enemies
 		screenBottomBar = game.add.sprite(0, game.world.height+100, "loadbar");
 		screenBottomBar.width = game.world.width;
@@ -130,21 +129,29 @@ var Level1 =
 		lifeCount = game.add.sprite(0, game.world.height-70, 'triangle');
 	    lifeCount.scale.setTo(0.08,0.08);
 
-	    //boom
-	    explosions = game.add.group();
-	    explosions.createMultiple(200, 'explode');
-	    explosions.forEach(this.setupBoom);
-
 		cursors = game.input.keyboard.createCursorKeys();
 		game.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ]);
+
+		//make some test enemies to shoot, feel free to change
+		// for(var i = 0; i<60; i++){
+		// 	for(var k = -3; k<4; k++){
+		// 		//console.log("spam");
+		// 		this.spawnEnemy(game.world.centerX+150*k, game.world.centerY- 150*i);
+		// 	}
+			
+		// }
 	},
 	update: function()
-	{
+	{	
+		//Spawns more enemies
+		if (game.time.now > spawnTime) this.makeEnemy();
+		//UI stuff
 		scoreText.text = scoreString + score;
 		test++;
 		testText.text = "Level Counter: " + test;
 		lifeCounter.text = "X " + lives;
 
+		//player movement
 		sprite.body.velocity.x = 0;
 	    sprite.body.velocity.y = 0;
 	    speed = 500 * moveSpeedMultiplier;
@@ -154,21 +161,30 @@ var Level1 =
 	    if (cursors.down.isDown) sprite.body.velocity.y = speed;
 	    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) this.fireBullet();
 
+	    //collision tests
 	    game.physics.arcade.overlap(bullets, enemies, this.bulletHit, null, this);
 	    game.physics.arcade.overlap(drops, sprite, this.dropCollected, null, this);
 	    game.physics.arcade.overlap(sprite, enemies, this.shipCollision, null, this);
 	    game.physics.arcade.overlap(screenBottomBar, enemies, this.enemyOffScreen, null, this);
 	},
-	
+	//Additional Functions
 
-	// //Additional Functions
-	spawnEnemy: function(x, y) {
+	makeEnemy: function() {
+		var x = game.rnd.integerInRange(0, game.world.width);
+		var y = game.rnd.integerInRange(0, 300);
+		var speed = game.rnd.integerInRange(600, 1200);
+		this.explodeFunct(x,y);
+		this.spawnEnemy(x, y, speed);
+	},
+	spawnEnemy: function(x, y, speed) {
         enemy = enemies.getFirstExists(false);
         if (enemy)
         {
             enemy.reset(x, y);
+            //this.explodeFunct(x,y);
             //testing enemy movement, for now they just fly straight down
-            enemy.body.velocity.y = 1200;
+            enemy.body.velocity.y = speed;
+            spawnTime = game.time.now +50;
         }	
 	},
 	setupBoom: function(boom) 
@@ -191,8 +207,7 @@ var Level1 =
 
 	    //RNG to see if victim drops something
 	    var i = game.rnd.integerInRange(0, 100);
-	    //100% drop rate to make testing easier
-	    if (true) this.enemyDrops(victim.body.x+50, victim.body.y+50);
+	    if (i>80) this.enemyDrops(victim.body.x+50, victim.body.y+50);
 	},
 	dropCollected: function(player, drop) {
 		var dropType = 10* drop.tint/0xffffff;
@@ -279,16 +294,17 @@ var Level1 =
 		stateVar = "CHEAT";
 		//if game's paused, clean up menu and resume
 		if(game.paused){
-			this.removeButton(resumeBtn)
-			this.removeButton(lifeBtn)
-			this.removeButton(dieBtn)
-			this.removeButton(speedBtn)
-			this.removeButton(slowBtn)
-			this.removeButton(shootFastBtn)
-			this.removeButton(fasterBtn)
-			this.removeButton(fastererBtn)
-			this.removeButton(fasterestBtn)
-			this.removeButton(scoreBtn)
+			this.removeButton(resumeBtn);
+			this.removeButton(lifeBtn);
+			this.removeButton(dieBtn);
+			this.removeButton(speedBtn);
+			this.removeButton(slowBtn);
+			this.removeButton(shootFastBtn);
+			this.removeButton(fasterBtn);
+			this.removeButton(fastererBtn);
+			this.removeButton(fasterestBtn);
+			this.removeButton(scoreBtn);
+			this.removeButton(endGameBtn);
 			this.pauseFunct();
 		}//if not paused, pause and make menu
 		else{
@@ -299,15 +315,17 @@ var Level1 =
 		resumeBtn = this.createButton("Resume",game.world.centerX,game.world.centerY+900,
 						 300, 100, this.cheatFunct);
 
-		lifeBtn = this.createButton("More lives?",game.world.centerX+360,game.world.centerY+30,
+		lifeBtn = this.createButton("More lives",game.world.centerX+360,game.world.centerY+30,
 						 300, 100, function(){lives+=5;});
-		dieBtn = this.createButton("Lose lives???",game.world.centerX+360,game.world.centerY+180, 
+		dieBtn = this.createButton("Lose lives",game.world.centerX+360,game.world.centerY+180, 
 						300, 100, function(){lives-=5;});
+		endGameBtn = this.createButton("Set lives to 0",game.world.centerX+360,game.world.centerY+480, 
+						300, 100, function(){lives=0;});
 		scoreBtn = this.createButton("Increase score",game.world.centerX+360,game.world.centerY+330, 
 						300, 100, function(){score+= 12345;});
 		speedBtn = this.createButton("Go fast",game.world.centerX-360,game.world.centerY+30, 
 						300, 100, function(){moveSpeedMultiplier = 2;});
-		slowBtn = this.createButton("Go slow???",game.world.centerX-360,game.world.centerY+180, 
+		slowBtn = this.createButton("Go slow",game.world.centerX-360,game.world.centerY+180, 
 						300, 100, function(){moveSpeedMultiplier = 0.5;});
 		shootFastBtn = this.createButton("Shoot fast",game.world.centerX,game.world.centerY+30, 
 						300, 100, function(){shootSpeedMultiplier = 1.5;});
@@ -329,7 +347,7 @@ var Level1 =
 		else{
 		this.pauseFunct(" Game\n Over", 250, null, game.world.centerY-900);
 		var string = "Score:" + score;
-		scoreText = game.add.text(game.world.centerX-this.scaleX(string, 40), game.world.centerY-200,
+		scoreText = game.add.text(game.world.centerX-this.scaleX(string, 35), game.world.centerY-200,
 						 string, {font:"120px Verdana", fill: "#FFF",align:"center"})
 
 		restartBtn = this.createButton("Restart",game.world.centerX,game.world.centerY+292,

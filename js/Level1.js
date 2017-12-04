@@ -382,13 +382,13 @@ var Level1 =
 	    //applies buff
 	    //if you come up with more buff ideas, simply add another case and make the range bigger in enemyDrops()
 	    switch(dropType){
-	    	case 1: 	moveSpeedMultiplier+=0.5; console.log("MOVE UP: " + moveSpeedMultiplier); break;
-	    	case 2: 	shotSpeedMultiplier+=0.5; console.log("SHOT SPEED UP: " + shotSpeedMultiplier); break;
-	    	case 3: 	shootRateMultiplier+=0.5; console.log("RATE UP: " + shootRateMultiplier); break;
+	    	case 1: 	if(moveSpeedMultiplier <3)moveSpeedMultiplier+=0.5; console.log("MOVE UP: " + moveSpeedMultiplier); break;
+	    	case 2: 	if(shotSpeedMultiplier <3)shotSpeedMultiplier+=0.5; console.log("SHOT SPEED UP: " + shotSpeedMultiplier); break;
+	    	case 3: 	if(shootRateMultiplier <4)shootRateMultiplier+=0.5; console.log("RATE UP: " + shootRateMultiplier); break;
 	    	case 4: 	score+=1000; console.log("SCORE UP: " + score); break;
 	    	case 5: 	lives+=1;	console.log("1-up! " + lives); break;
-	    	case 6: 	shotSpread+=2;	console.log("SPREAD UP " + shotSpread); break;
-	    	case 7: 	iFrames+=1;	console.log("I-FRAMES UP "+ iFrames); break;
+	    	case 6: 	if(shotSpread <7)shotSpread+=2;	console.log("SPREAD UP " + shotSpread); break;
+	    	case 7: 	if(iFrames <10)iFrames+=1;	console.log("I-FRAMES UP "+ iFrames); break;
 	    	
 	    	default: 	console.log("I don't know what you just picked up"); break;
 	    }

@@ -23,11 +23,7 @@ var MainMenu =
 		button1.anchor.setTo(0.5,0.5);
 		button1.width = w;
 		button1.height = h;
-		var txt = game.add.text(button1.x,button1.y,string,{font:"40px Arial", fill: "#0",align:"center"});
+		var txt = game.add.text(button1.x,button1.y,string,{font:"40px Arial", fill: "#FFFFFF",align:"center"});
 		txt.anchor.setTo(0.5,0.5);
 	}
 };
-// MainMenu.prototype = 
-// {
-	
-// };

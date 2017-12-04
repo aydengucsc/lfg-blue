@@ -1,0 +1,26 @@
+Pause/resume/quit
+	Can be tested with pause menu
+
+Scoring system
+	Score can be increased and decreased using the cheats menu
+
+Enemy spawning
+	Enemy spawns can be tested using dev menu
+
+Losing lives
+	Press "k" simulates player being hit and losing a life
+	
+Powerups
+	Multipliers can be increased and decreased using the cheats menu
+
+Boss spawning
+	Enemy spawns can be tested using dev menu
+
+Enemy death
+	Dev menu
+
+Boss death
+	Dev menu
+	
+Game over
+	Dev menu

@@ -161,6 +161,7 @@ var Level1 =
 		//enemies stuff
 		if (game.time.now > spawnTime && !bossBattle) this.makeEnemy();
 		if (game.time.now > firingTime) this.enemyShoot();
+		if (game.time.now > firingTime && bossBattle == 5) this.bossShoot();
 
 		//UI stuff
 		scoreText.text = scoreString + score;
@@ -179,7 +180,7 @@ var Level1 =
 	    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) this.fireBullet();
 
 	    //BOSS FIGHT
-		if(!bossBattle && score > 5000 && !bossKilled) this.prepBoss();
+		if(!bossBattle && score > -1 && !bossKilled) this.prepBoss();
 	    if (bossBattle == 1 && enemies.getFirstExists()) this.prepBoss2();
 	    if (bossBattle == 2) this.prepBoss3();
 	    if (boss.body.y >= game.world.centerY - 600 && bossBattle == 3){
@@ -206,6 +207,7 @@ var Level1 =
 	    game.physics.arcade.overlap(bullets, boss, this.bossHurt, null, this);
 	    game.physics.arcade.overlap(drops, sprite, this.dropCollected, null, this);
 	    game.physics.arcade.overlap(sprite, enemies, this.shipCollision, null, this);
+	    game.physics.arcade.overlap(sprite, boss, this.killFunct, null, this);
 	    game.physics.arcade.overlap(screenBottomBar, enemies, this.enemyOffScreen, null, this);
 	},
 	//Additional Functions
@@ -298,6 +300,20 @@ var Level1 =
 	    	bulletTime = game.time.now;
 		}
 	},
+	bossShoot: function(){
+		var bullet = enemyBullets.getFirstExists(false)
+		if (bullet) {
+              bullet.reset(boss.x, boss.y+150);
+              bullet.tint = 0xff0000;
+	       	  bullet.body.velocity.y = 1000;
+
+	       	  var offsetx = game.rnd.integerInRange(-50, 50);
+		      var offsety = game.rnd.integerInRange(-50, 50);
+
+	       	  game.physics.arcade.moveToXY(bullet,sprite.body.x + offsetx, sprite.body.y + offsety,200);
+	       	  firingTime = game.time.now + 250;
+        }
+	},
 	bossDeath: function() 
 	{	
 		bossHPBar.kill();
@@ -323,17 +339,26 @@ var Level1 =
 		boss.kill();
 		bossBattle= 0;
 	},
+	//previous bossHurt hitbox was off fixed it so that it wouldn't the lower quadrants 
 	bossHurt: function(boss, shot) {
-		if(bossBattle == 5){
-			//kill bullet sprites
-		    shot.kill();
-		    bossHealth-=0.02;
-		    bossHPBar.width = game.world.width-game.world.width*(1-bossHealth);
-		    if (bossHealth <= 0){
-		    	this.bossDeath();
-		    }
-	   	}
-	    //console.log("boss hurt, HP = " + bossHealth);
+
+	    if ((shot.x > boss.x + boss.width / 5 &&
+	        shot.y > boss.y) ||
+	        (shot.x < boss.x - boss.width / 5 &&
+	        shot.y > boss.y)) {
+	      return false;
+	    } 
+	    else {
+	    	if(bossBattle == 5){
+		    	shot.kill();
+			    bossHealth-=0.02;
+			    bossHPBar.width = game.world.width-game.world.width*(1-bossHealth);
+			    if (bossHealth <= 0){
+			    	this.bossDeath();
+			    }
+	    	}
+		    
+	    }
 	},
 	setupBoom: function(boom) 
 	{
@@ -590,7 +615,7 @@ var Level1 =
 		button1.anchor.setTo(0.5,0.5);
 		button1.width = w;
 		button1.height = h;
-		var txt = game.add.text(button1.x,button1.y,string,{font:"40px Arial", fill: "#0",align:"center"});
+		var txt = game.add.text(button1.x,button1.y,string,{font:"40px Arial", fill: "#FFFFFF",align:"center"});
 		txt.anchor.setTo(0.5,0.5);
 		return {"0":button1,"1":txt};
 	},

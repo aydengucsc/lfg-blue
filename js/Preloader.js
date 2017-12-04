@@ -6,7 +6,7 @@ var Preloader = {
 		game.load.setPreloadSprite(preloadBar);
 
 		game.load.image('titlescreen', 'assets/images/background.png');
-		game.load.spritesheet('button', 'assets/images/flixel-button.png', 80, 20);
+		game.load.image('button', 'assets/images/cheatButton.png', 80, 20);
 		game.load.image('title', 'assets/images/title.png');
 		game.load.image('pause', 'assets/images/pause.png');
 	},

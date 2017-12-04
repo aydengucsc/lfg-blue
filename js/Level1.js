@@ -12,8 +12,6 @@ var Level1 =
 		game.load.image('enemy', 'assets/images/enemy.png');
 		game.load.image('boss', 'assets/images/boss.png');
 		game.load.spritesheet('explode', 'assets/images/explode.png', 128, 128);
-
-		//placeholder image for enemy drops
 		game.load.image('drop', 'assets/images/doritos.png');
  	},
 	create: function()
@@ -32,6 +30,7 @@ var Level1 =
 		bossBattle = 0;
 		bossDelay = 0;
 		bossKilled = false;
+		debug = false;
 		//gameplay-related numbers end
 
 		stateVar = "START";
@@ -140,33 +139,21 @@ var Level1 =
 		game.input.keyboard.addCallbacks(this, null, null, this.pressFunct);
 
 		this.createButton("Pause",game.world.centerX*1.65, 100, 300, 100, this.pauseMenu);
-		this.createButton("Dev Mode",game.world.centerX*1.65, 225, 300, 100, this.cheatFunct);
+		this.createButton("Dev Mode",game.world.centerX*1.65, 225, 300, 100, this.devMenu);
 
 		//UI
 		scoreString = 'Score: ';
 		scoreText = game.add.text(10,10, scoreString + score, {font: '40px Arial', fill:'#fff'});
-		//testText = game.add.text(game.world.centerX-465,game.world.centerY-800,"Game up:" + test,{font:"50px Verdana", fill: "#fff"});
-
-		//make some test enemies to shoot, feel free to change
-		// for(var i = 0; i<60; i++){
-		// 	for(var k = -3; k<4; k++){
-		// 		//console.log("spam");
-		// 		this.spawnEnemy(game.world.centerX+150*k, game.world.centerY- 150*i);
-		// 	}
-			
-		// }
 	},
 	update: function()
 	{	
 		//enemies stuff
-		if (game.time.now > spawnTime && !bossBattle) this.makeEnemy();
-		if (game.time.now > firingTime) this.enemyShoot();
-		if (game.time.now > firingTime && bossBattle == 5) this.bossShoot();
+		if (game.time.now > spawnTime && !bossBattle && !debug) this.makeEnemy();
+		if (game.time.now > firingTime && !debug) this.enemyShoot();
+		if (game.time.now > firingTime && bossBattle == 5 &&!debug) this.bossShoot();
 
 		//UI stuff
 		scoreText.text = scoreString + score;
-		//test++;
-		//testText.text = "Level Counter: " + test;
 		lifeCounter.text = "X " + lives;
 
 		//player stuff
@@ -180,7 +167,7 @@ var Level1 =
 	    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) this.fireBullet();
 
 	    //BOSS FIGHT
-		if(!bossBattle && score > -1 && !bossKilled) this.prepBoss();
+		if(!bossBattle && score > 5000 && !bossKilled) this.prepBoss();
 	    if (bossBattle == 1 && enemies.getFirstExists()) this.prepBoss2();
 	    if (bossBattle == 2) this.prepBoss3();
 	    if (boss.body.y >= game.world.centerY - 600 && bossBattle == 3){
@@ -211,7 +198,6 @@ var Level1 =
 	    game.physics.arcade.overlap(screenBottomBar, enemies, this.enemyOffScreen, null, this);
 	},
 	//Additional Functions
-
 	makeEnemy: function() {
 		var x = game.rnd.integerInRange(0, game.world.width);
 		var xspeed = game.rnd.integerInRange(-100, 100);
@@ -321,8 +307,6 @@ var Level1 =
 		bossBattle = "BOSS IS KILL";
 		bossKilled = true;
 		bossExplodeCount = 0;
-		// boss.kill();
-		// bossBattle= 0;
 	},
 	bossExplode: function() 
 	{	
@@ -390,15 +374,10 @@ var Level1 =
 	dropCollected: function(player, drop) {
 		var dropType = 10* drop.tint/0xffffff;
 		//console.log("type was: "+dropType);
-		//kill drop
 	    drop.kill();
 
 	    //Increase the score
 	    scoreText.text = scoreString + score;
-
-	    //explode because why not
-	    //NVM EXPLODING MAKES THE GAME REALLY HARD
-	    //this.explodeFunct(player.body.x, player.body.y);
 
 	    //applies buff
 	    //if you come up with more buff ideas, simply add another case and make the range bigger in enemyDrops()
@@ -452,20 +431,6 @@ var Level1 =
 		}
 	},
 	fireBullet: function() {
-		//machine gun *obsolete*
-		// if (game.time.now > bulletTime)
-	 //    {
-	 //        bullet = bullets.getFirstExists(false);
-	 //        shootDelay = 50 / shootRateMultiplier;
-	 //        if (bullet)
-	 //        {
-	 //            bullet.reset(sprite.x-4, sprite.y-60);
-	 //            bullet.body.velocity.y = -1000;
-	 //            bulletTime = game.time.now +shootDelay;
-	 //        }
-	 //    }
-	 //shotgun  with spread of 1 behaves the same as machinegun
-	    //shotSpread = 1;
     	if (game.time.now > bulletTime) {
     		shootDelay = 150 / shootRateMultiplier;
             for (var i = 0; i < shotSpread; i++) {
@@ -493,7 +458,13 @@ var Level1 =
 	    explosion.alpha = 0.5;
 	    explosion.play('explode', 30, false, true);
 	},
-
+	testEnemies: function(){
+		for(var i = 0; i<6; i++){
+			for(var k = -3; k<4; k++){
+				this.spawnEnemy(game.world.centerX+150*k, game.world.centerY- 150*i);
+			}
+		}
+	},
 
 	cheatFunct: function(){
 		stateVar = "CHEAT";
@@ -515,7 +486,6 @@ var Level1 =
 			this.pauseFunct();
 		}//if not paused, pause and make menu
 		else{
-		//Lots of placeholders to demonstrate possible button placements. 
 		//For X, use centerX, X+360, X-360
 		//for Y, Add 150 between each button.
 		this.pauseFunct("Cheats", 250);
@@ -523,13 +493,13 @@ var Level1 =
 						 300, 100, this.cheatFunct);
 
 		lifeBtn = this.createButton("More lives",game.world.centerX+360,game.world.centerY+30,
-						 300, 100, function(){lives+=5;});
+						 300, 100, function(){lives+=5; console.log("lives UP: "+ lives);});
 		dieBtn = this.createButton("Lose lives",game.world.centerX+360,game.world.centerY+180, 
-						300, 100, function(){lives-=5;});
+						300, 100, function(){lives-=5; console.log("lives DOWN: "+ lives);});
 		endGameBtn = this.createButton("Set lives to 0",game.world.centerX+360,game.world.centerY+330, 
-						300, 100, function(){lives=0;});
+						300, 100, function(){lives=0; console.log("lives =: "+ lives);});
 		scoreBtn = this.createButton("Increase score",game.world.centerX+360,game.world.centerY+480, 
-						300, 100, function(){score+= 25000;});
+						300, 100, function(){score+= 25000; console.log("score UP: "+ score);});
 		speedBtn = this.createButton("Go faster",game.world.centerX-360,game.world.centerY+30, 
 						300, 100, function(){moveSpeedMultiplier += 1; console.log("moveSpeed UP: "+ moveSpeedMultiplier);});
 		slowBtn = this.createButton("Go slower",game.world.centerX-360,game.world.centerY+180, 
@@ -548,7 +518,56 @@ var Level1 =
 						300, 100, function(){shotSpread -= 2; console.log("shotSpread DOWN: "+ shotSpread);});
 		}
 	},
+	devMenu: function(){
+		stateVar = "DEV";
+		//if game's paused, clean up menu and resume
+		if(game.paused){
+			this.removeButton(resumeBtn);
+			this.removeButton(spawnBtn);
+			this.removeButton(toggleBtn);
+			this.removeButton(spawnBossBtn);
+			this.removeButton(killAllBtn);
+			this.removeButton(gameOverBtn);
+			this.removeButton(restartBtn);
+			this.removeButton(killBossBtn);
+			this.pauseFunct();
+		}//if not paused, pause and make menu
+		else{
+		//For X, use centerX, X+360, X-360
+		//for Y, Add 150 between each button.
+		this.pauseFunct("Dev Mode", 200);
+		resumeBtn = this.createButton("Resume",game.world.centerX,game.world.centerY+900,
+						 300, 100, this.devMenu);
+		toggleBtn = this.createButton("Toggle debug",game.world.centerX,game.world.centerY-150,
+						 300, 100, function(){this.debugToggle(); console.log("debug = "+ debug);});
 
+
+		spawnBtn = this.createButton("Spawn enemies",game.world.centerX-360,game.world.centerY+30,
+						 300, 100, function(){this.testEnemies(); console.log("Enemies spawned");});
+		spawnBossBtn = this.createButton("Spawn boss",game.world.centerX-360,game.world.centerY+180,
+						 300, 100, function(){this.prepBoss(); console.log("BOSS TIME");});
+		gameOverBtn = this.createButton("Game Over",game.world.centerX,game.world.centerY+30,
+						 300, 100, function(){this.devMenu(); this.gameOver(); console.log("Game over");});
+		restartBtn = this.createButton("Restart",game.world.centerX,game.world.centerY+180,
+						 300, 100, function(){game.state.start('Level1'); game.paused = false;});
+		killAllBtn = this.createButton("Kill enemies",game.world.centerX+360,game.world.centerY+30,
+						 300, 100, function(){this.debugKillAll(); console.log("Enemies killed");});
+		killBossBtn = this.createButton("Kill boss",game.world.centerX+360,game.world.centerY+180,
+						 300, 100, function(){this.bossDeath(); console.log("Boss killed");});
+		}
+	},
+	debugToggle: function(){
+		debug = !debug;
+		enemies.killAll();
+		enemyBullets.killAll();
+
+	},
+	debugKillAll: function(){
+		while(victim =  enemies.getFirstExists(true)){
+				this.explodeFunct(victim.x, victim.y);
+				victim.kill();
+		}
+	},
 	//if game's already paused/over, don't unpause it cause you lost
 	gameOver: function(){
 		stateVar = "END";
@@ -636,6 +655,7 @@ var Level1 =
 		}
 		if(char == 'c' && game.paused && stateVar!= "END"){
 			if (stateVar == "PAUSE")this.pauseMenu();
+			if (stateVar == "DEV")this.devMenu();
 			this.cheatFunct();
 		}
 		//debug kill
@@ -652,7 +672,6 @@ var Level1 =
 		 *console.log("You pressed: ", char);
 		 */
 	},
-
 	scaleX:function(string, fontsize)
 	{
 		x = string.length * fontsize;

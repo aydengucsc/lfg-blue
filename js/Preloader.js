@@ -12,6 +12,6 @@ var Preloader = {
 	},
 	create: function()
 	{
-		game.state.start("Level1");
+		game.state.start("MainMenu");
 	}
 }
